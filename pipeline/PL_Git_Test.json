@@ -1,0 +1,46 @@
+{
+	"name": "PL_Git_Test",
+	"properties": {
+		"activities": [
+			{
+				"name": "Wait1",
+				"type": "Wait",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"waitTimeInSeconds": 5
+				}
+			},
+			{
+				"name": "Set variable1",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "Wait1",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "Wish",
+					"value": "Good Morning"
+				}
+			}
+		],
+		"variables": {
+			"Wish": {
+				"type": "String"
+			}
+		},
+		"folder": {
+			"name": "ABC_Dev"
+		},
+		"annotations": []
+	}
+}
