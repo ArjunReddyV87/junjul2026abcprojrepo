@@ -9,6 +9,10 @@
 			"GP_STORAGE_CONTAINER": {
 				"type": "string",
 				"value": "abcdev"
+			},
+			"GP_POLLING_COUNT": {
+				"type": "int",
+				"value": 5
 			}
 		},
 		"trustModeClaimForMi": {
