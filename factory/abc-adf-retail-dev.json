@@ -5,6 +5,10 @@
 			"GP_ENVIRONMENT": {
 				"type": "string",
 				"value": "DEV"
+			},
+			"GP_STORAGE_CONTAINER": {
+				"type": "string",
+				"value": "abcdev"
 			}
 		},
 		"trustModeClaimForMi": {
