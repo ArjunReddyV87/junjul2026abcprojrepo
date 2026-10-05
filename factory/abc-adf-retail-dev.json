@@ -25,6 +25,10 @@
 			"GP_ARCHIVE_DAYS": {
 				"type": "int",
 				"value": 30
+			},
+			"GP_EMAIL_TO": {
+				"type": "string",
+				"value": "varjunreddy87@gmail.com"
 			}
 		},
 		"trustModeClaimForMi": {
