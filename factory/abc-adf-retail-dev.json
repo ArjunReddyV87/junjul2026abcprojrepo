@@ -21,6 +21,10 @@
 			"GP_BATCH_SLA_MINUTES": {
 				"type": "int",
 				"value": 120
+			},
+			"GP_ARCHIVE_DAYS": {
+				"type": "int",
+				"value": 30
 			}
 		},
 		"trustModeClaimForMi": {
