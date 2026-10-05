@@ -1,0 +1,58 @@
+{
+	"name": "DS_Control_tbl",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "LS_SQLDB",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": [
+			{
+				"name": "FileID",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "FileName",
+				"type": "varchar"
+			},
+			{
+				"name": "FolderName",
+				"type": "varchar"
+			},
+			{
+				"name": "SourcePath",
+				"type": "varchar"
+			},
+			{
+				"name": "BronzePath",
+				"type": "varchar"
+			},
+			{
+				"name": "SilverPath",
+				"type": "varchar"
+			},
+			{
+				"name": "RejectedPath",
+				"type": "varchar"
+			},
+			{
+				"name": "ArchivePath",
+				"type": "varchar"
+			},
+			{
+				"name": "ActiveFlag",
+				"type": "char"
+			},
+			{
+				"name": "ExpectedFrequency",
+				"type": "varchar"
+			}
+		],
+		"typeProperties": {
+			"schema": "dbo",
+			"table": "CTL_FILE_MASTER"
+		}
+	}
+}

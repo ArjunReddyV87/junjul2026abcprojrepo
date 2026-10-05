@@ -1,10 +1,90 @@
 {
 	"name": "PL_FILE_POLLING",
 	"properties": {
+		"activities": [
+			{
+				"name": "UNTIL_FILES_AVAILABLE",
+				"type": "Until",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"expression": {
+						"value": "@or(\n    equals(variables('vMissingCount'),0),\n    greaterOrEquals(\n        variables('vRetryCount'),\n        pipeline().globalParameters.GP_POLLING_COUNT\n    )\n)",
+						"type": "Expression"
+					},
+					"activities": [
+						{
+							"name": "Execute Pipeline1",
+							"type": "ExecutePipeline",
+							"dependsOn": [],
+							"policy": {
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"pipeline": {
+									"referenceName": "PL_File_Check",
+									"type": "PipelineReference"
+								},
+								"waitOnCompletion": true
+							}
+						},
+						{
+							"name": "Lookup1",
+							"type": "Lookup",
+							"dependsOn": [
+								{
+									"activity": "Execute Pipeline1",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "AzureSqlSource",
+									"sqlReaderQuery": "",
+									"queryTimeout": "02:00:00",
+									"partitionOption": "None"
+								},
+								"dataset": {
+									"referenceName": "DS_Log_file",
+									"type": "DatasetReference"
+								},
+								"firstRowOnly": false
+							}
+						}
+					],
+					"timeout": "0.12:00:00"
+				}
+			}
+		],
 		"parameters": {
 			"pBatchDate": {
 				"type": "string",
 				"defaultValue": "@formatDateTime(utcnow(),'yyyy-MM-dd')"
+			}
+		},
+		"variables": {
+			"vRetryCount": {
+				"type": "Integer",
+				"defaultValue": 0
+			},
+			"vMissingCount": {
+				"type": "Integer",
+				"defaultValue": 1
+			},
+			"vFileExists": {
+				"type": "Boolean",
+				"defaultValue": false
 			}
 		},
 		"folder": {
