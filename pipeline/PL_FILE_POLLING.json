@@ -1,17 +1,12 @@
 {
 	"name": "PL_FILE_POLLING",
 	"properties": {
-		"activities": [
-			{
-				"name": "Wait1",
-				"type": "Wait",
-				"dependsOn": [],
-				"userProperties": [],
-				"typeProperties": {
-					"waitTimeInSeconds": 1
-				}
+		"parameters": {
+			"pBatchDate": {
+				"type": "string",
+				"defaultValue": "@formatDateTime(utcnow(),'yyyy-MM-dd')"
 			}
-		],
+		},
 		"folder": {
 			"name": "ABC_Dev"
 		},
