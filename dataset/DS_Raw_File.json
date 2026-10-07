@@ -5,6 +5,14 @@
 			"referenceName": "LS_Input_Raw_File",
 			"type": "LinkedServiceReference"
 		},
+		"parameters": {
+			"DS_Raw_Path": {
+				"type": "string"
+			},
+			"DS_Raw_FileName": {
+				"type": "string"
+			}
+		},
 		"annotations": [],
 		"type": "DelimitedText",
 		"typeProperties": {

@@ -9,7 +9,7 @@
 			"DS_Sink_Path": {
 				"type": "string"
 			},
-			"DS_Sink_FileName": {
+			"DS_Sink_Filename": {
 				"type": "string"
 			}
 		},
@@ -17,7 +17,19 @@
 		"type": "DelimitedText",
 		"typeProperties": {
 			"location": {
-				"type": "AzureBlobFSLocation"
+				"type": "AzureBlobFSLocation",
+				"fileName": {
+					"value": "@dataset().DS_Sink_Filename",
+					"type": "Expression"
+				},
+				"folderPath": {
+					"value": "@dataset().DS_Sink_Path",
+					"type": "Expression"
+				},
+				"fileSystem": {
+					"value": "abcdev",
+					"type": "Expression"
+				}
 			},
 			"columnDelimiter": ",",
 			"escapeChar": "\\",

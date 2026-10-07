@@ -95,13 +95,7 @@
 							"inputs": [
 								{
 									"referenceName": "DS_Raw_File",
-									"type": "DatasetReference",
-									"parameters": {
-										"FileName": {
-											"value": "@item().FileName",
-											"type": "Expression"
-										}
-									}
+									"type": "DatasetReference"
 								}
 							],
 							"outputs": [
@@ -113,7 +107,7 @@
 											"value": "@item().BronzePath",
 											"type": "Expression"
 										},
-										"DS_Sink_FileName": {
+										"DS_Sink_Filename": {
 											"value": "@item().FileName",
 											"type": "Expression"
 										}

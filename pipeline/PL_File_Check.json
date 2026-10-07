@@ -62,17 +62,7 @@
 							"typeProperties": {
 								"dataset": {
 									"referenceName": "DS_Raw_File",
-									"type": "DatasetReference",
-									"parameters": {
-										"Raw_SourcePath": {
-											"value": "@item().SourcePath",
-											"type": "Expression"
-										},
-										"FileName": {
-											"value": "@item().FileName",
-											"type": "Expression"
-										}
-									}
+									"type": "DatasetReference"
 								},
 								"fieldList": [
 									"exists"
