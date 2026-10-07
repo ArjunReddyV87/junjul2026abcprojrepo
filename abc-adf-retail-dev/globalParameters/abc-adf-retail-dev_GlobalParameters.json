@@ -34,5 +34,9 @@
 	"GP_EMAIL_CC": {
 		"type": "string",
 		"value": "kadapananiranjan@gmail.com"
+	},
+	"GP_CUSTOMER_NAME": {
+		"type": "string",
+		"value": "ABC"
 	}
 }
