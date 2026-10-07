@@ -3,7 +3,7 @@
 	"properties": {
 		"activities": [
 			{
-				"name": "Web1",
+				"name": "Batch Start email",
 				"type": "WebActivity",
 				"dependsOn": [],
 				"policy": {
@@ -21,7 +21,7 @@
 						"type": "Expression"
 					},
 					"body": {
-						"value": "{\n  \"to\": \"@{pipeline().globalParameters.GP_EMAIL_TO}\",\n  \"subject\": \"ABC Dev Daily Batch started 20261007\",\n  \"body\": \"Daily Batch started\"\n\n}",
+						"value": "{\n  \"to\": \"@{pipeline().globalParameters.GP_EMAIL_TO}\",\n  \"subject\": \"@{concat(pipeline().globalParameters.GP_CUSTOMER_NAME, ' ', pipeline().globalParameters.GP_ENVIRONMENT, ' Daily Batch started ', formatDateTime(utcNow(), 'yyyyMMdd'))}\",\n  \"body\": \"Daily Batch started\"\n}",
 						"type": "Expression"
 					}
 				}
