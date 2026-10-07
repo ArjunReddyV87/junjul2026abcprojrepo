@@ -414,6 +414,162 @@
 							],
 							"timeout": "0.12:00:00"
 						}
+					},
+					{
+						"name": "Get final Missing file count",
+						"type": "Lookup",
+						"dependsOn": [
+							{
+								"activity": "UNTIL_FILES_AVAILABLE",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureSqlSource",
+								"sqlReaderQuery": {
+									"value": "SELECT COUNT(*) totfile_miscnt\nFROM LOG_FILE_POLLING\nWHERE CAST(BatchDate AS DATE) = '@{pipeline().parameters.pBatchDate}'\n  AND RetryNumber = 0\n  and FileExists <> 'T'",
+									"type": "Expression"
+								},
+								"queryTimeout": "02:00:00",
+								"partitionOption": "None"
+							},
+							"dataset": {
+								"referenceName": "DS_Log_file",
+								"type": "DatasetReference",
+								"parameters": {}
+							},
+							"firstRowOnly": true
+						}
+					},
+					{
+						"name": "If Condition1",
+						"type": "IfCondition",
+						"dependsOn": [
+							{
+								"activity": "Get final Missing file count",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"expression": {
+								"value": "@equals(activity('Get final Missing file count').output.firstRow.totfile_miscnt,0)",
+								"type": "Expression"
+							},
+							"ifFalseActivities": [
+								{
+									"name": "Send Missing Files Email",
+									"type": "WebActivity",
+									"dependsOn": [
+										{
+											"activity": "Get Missing Files",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"policy": {
+										"timeout": "0.12:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"method": "POST",
+										"headers": {},
+										"url": {
+											"value": "@pipeline().globalParameters.GP_Logicapp_URL",
+											"type": "Expression"
+										},
+										"body": {
+											"value": "{\n  \"to\": \"@{pipeline().globalParameters.GP_EMAIL_TO}\",\n  \"subject\": \"@{concat(pipeline().globalParameters.GP_CUSTOMER_NAME, ' ', pipeline().globalParameters.GP_ENVIRONMENT, ' Missing files ', formatDateTime(utcNow(), 'yyyyMMdd'))}\",\n  \"body\": \"Find Below Missing Files list\",\n  \"missingFiles\": @{activity('Get Missing Files').output.value}\n}",
+											"type": "Expression"
+										}
+									}
+								},
+								{
+									"name": "Fail Batch",
+									"type": "Fail",
+									"dependsOn": [
+										{
+											"activity": "Send Missing Files Email",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"userProperties": [],
+									"typeProperties": {
+										"message": "Files not available",
+										"errorCode": "Files missing"
+									}
+								},
+								{
+									"name": "Get Missing Files",
+									"type": "Lookup",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "0.12:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"source": {
+											"type": "AzureSqlSource",
+											"sqlReaderQuery": {
+												"value": "SELECT FileID\n,FileName\nFROM LOG_FILE_POLLING\nWHERE CAST(BatchDate AS DATE) = '@{pipeline().parameters.pBatchDate}'\n  AND RetryNumber = 0\n  and FileExists <> 'T'",
+												"type": "Expression"
+											},
+											"queryTimeout": "02:00:00",
+											"partitionOption": "None"
+										},
+										"dataset": {
+											"referenceName": "DS_Log_file",
+											"type": "DatasetReference",
+											"parameters": {}
+										},
+										"firstRowOnly": false
+									}
+								}
+							],
+							"ifTrueActivities": [
+								{
+									"name": "Copy Files from raw to bronze",
+									"type": "ExecutePipeline",
+									"dependsOn": [],
+									"policy": {
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"pipeline": {
+											"referenceName": "PL_COPY_FILES_RAW_TO_BRONZ",
+											"type": "PipelineReference"
+										},
+										"waitOnCompletion": true,
+										"parameters": {}
+									}
+								}
+							]
+						}
 					}
 				],
 				"policy": {
@@ -448,8 +604,9 @@
 				"annotations": []
 			},
 			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/DS_Log_file')]",
 				"[concat(variables('factoryId'), '/pipelines/PL_File_Check')]",
-				"[concat(variables('factoryId'), '/datasets/DS_Log_file')]"
+				"[concat(variables('factoryId'), '/pipelines/PL_COPY_FILES_RAW_TO_BRONZ')]"
 			]
 		},
 		{
@@ -821,14 +978,7 @@
 					{
 						"name": "Load customer",
 						"type": "ExecutePipeline",
-						"dependsOn": [
-							{
-								"activity": "Check for files",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
+						"dependsOn": [],
 						"policy": {
 							"secureInput": false
 						},
@@ -845,14 +995,7 @@
 					{
 						"name": "Load Product",
 						"type": "ExecutePipeline",
-						"dependsOn": [
-							{
-								"activity": "Check for files",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
+						"dependsOn": [],
 						"policy": {
 							"secureInput": false
 						},
