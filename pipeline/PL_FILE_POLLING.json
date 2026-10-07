@@ -26,7 +26,124 @@
 									"referenceName": "PL_File_Check",
 									"type": "PipelineReference"
 								},
-								"waitOnCompletion": true
+								"waitOnCompletion": true,
+								"parameters": {
+									"pbatchdate": {
+										"value": "@pipeline().parameters.pBatchDate",
+										"type": "Expression"
+									},
+									"pretrycnt": {
+										"value": "@variables('vRetryCount')",
+										"type": "Expression"
+									}
+								}
+							}
+						},
+						{
+							"name": "Get Missing file count",
+							"type": "Lookup",
+							"dependsOn": [
+								{
+									"activity": "Execute Pipeline1",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "AzureSqlSource",
+									"sqlReaderQuery": {
+										"value": "Select Count(*) as totfile_miscnt\nFROM LOG_FILE_POLLING\nWHERE BatchDate = @{pipeline().parameters.pBatchDate}\nAND RetryNumber  = @{variables('vRetryCount')}",
+										"type": "Expression"
+									},
+									"queryTimeout": "02:00:00",
+									"partitionOption": "None"
+								},
+								"dataset": {
+									"referenceName": "DS_Log_file",
+									"type": "DatasetReference"
+								}
+							}
+						},
+						{
+							"name": "Assign Missing file count",
+							"type": "SetVariable",
+							"dependsOn": [
+								{
+									"activity": "Get Missing file count",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "vMissingCount",
+								"value": {
+									"value": "@activity('Get Missing file count').output.totfile_miscnt",
+									"type": "Expression"
+								}
+							}
+						},
+						{
+							"name": "Set retry temp",
+							"type": "SetVariable",
+							"dependsOn": [
+								{
+									"activity": "Get Missing file count",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "vRetryCount_Temp",
+								"value": {
+									"value": "@variables('vRetryCount')",
+									"type": "Expression"
+								}
+							}
+						},
+						{
+							"name": "Set retry cnt",
+							"type": "SetVariable",
+							"dependsOn": [
+								{
+									"activity": "Set retry temp",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "vRetryCount",
+								"value": {
+									"value": "@add(variables('vRetryCount_Temp'),1)",
+									"type": "Expression"
+								}
 							}
 						}
 					],
@@ -52,6 +169,10 @@
 			"vFileExists": {
 				"type": "Boolean",
 				"defaultValue": false
+			},
+			"vRetryCount_Temp": {
+				"type": "String",
+				"defaultValue": "1"
 			}
 		},
 		"folder": {
