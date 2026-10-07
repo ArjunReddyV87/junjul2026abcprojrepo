@@ -95,7 +95,13 @@
 							"inputs": [
 								{
 									"referenceName": "DS_Raw_File",
-									"type": "DatasetReference"
+									"type": "DatasetReference",
+									"parameters": {
+										"DS_Raw_Path": {
+											"value": "@item().SourcePath",
+											"type": "Expression"
+										}
+									}
 								}
 							],
 							"outputs": [

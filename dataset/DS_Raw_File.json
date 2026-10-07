@@ -18,9 +18,14 @@
 		"typeProperties": {
 			"location": {
 				"type": "AzureBlobFSLocation",
-				"fileName": "customer.csv",
-				"folderPath": "customer",
-				"fileSystem": "raw"
+				"fileName": {
+					"value": "@dataset().DS_Raw_FileName",
+					"type": "Expression"
+				},
+				"fileSystem": {
+					"value": "@dataset().DS_Raw_Path",
+					"type": "Expression"
+				}
 			},
 			"columnDelimiter": ",",
 			"escapeChar": "\\",
