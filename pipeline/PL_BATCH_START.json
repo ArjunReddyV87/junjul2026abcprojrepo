@@ -21,7 +21,7 @@
 						"type": "Expression"
 					},
 					"body": {
-						"value": "{\n  \"to\": {GP_EMAIL_TO},\n  \"subject\": \"ABC Dev Daily Batch started 20261007\",\n  \"body\": \"Daily Batch started\",\n  \"cc\": {GP_EMAIL_CC}\n}",
+						"value": "{\n  \"to\": \"@{pipeline().globalParameters.GP_EMAIL_TO}\",\n  \"subject\": \"ABC Dev Daily Batch started 20261007\",\n  \"body\": \"Daily Batch started\"\n\n}",
 						"type": "Expression"
 					}
 				}
