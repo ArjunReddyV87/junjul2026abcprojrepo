@@ -1,0 +1,38 @@
+{
+	"GP_ENVIRONMENT": {
+		"type": "string",
+		"value": "DEV"
+	},
+	"GP_STORAGE_CONTAINER": {
+		"type": "string",
+		"value": "abcdev"
+	},
+	"GP_POLLING_COUNT": {
+		"type": "int",
+		"value": 5
+	},
+	"GP_POLLING_WAIT_SECONDS": {
+		"type": "int",
+		"value": 60
+	},
+	"GP_BATCH_SLA_MINUTES": {
+		"type": "int",
+		"value": 120
+	},
+	"GP_ARCHIVE_DAYS": {
+		"type": "int",
+		"value": 30
+	},
+	"GP_EMAIL_TO": {
+		"type": "string",
+		"value": "kadapananiranjan@gmail.com"
+	},
+	"GP_Logicapp_URL": {
+		"type": "string",
+		"value": "https://prod-12.centralindia.logic.azure.com:443/workflows/74912cd2c09944c4b11201ff63206431/triggers/When_an_HTTP_request_is_received/paths/invoke?api-version=2016-10-01&sp=%2Ftriggers%2FWhen_an_HTTP_request_is_received%2Frun&sv=1.0&sig=Plc4OnzlqVsgeLRSX5kMt_dgpSxFOzo8wvdUs7wF6OU"
+	},
+	"GP_EMAIL_CC": {
+		"type": "string",
+		"value": "kadapananiranjan@gmail.com"
+	}
+}

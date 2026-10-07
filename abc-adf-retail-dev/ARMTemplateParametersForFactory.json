@@ -1,0 +1,33 @@
+{
+	"$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"value": "abc-adf-retail-dev"
+		},
+		"LS_Input_Raw_File_accountKey": {
+			"value": ""
+		},
+		"LS_SQLDB_password": {
+			"value": ""
+		},
+		"LS_abcadlsretaildev_accountKey": {
+			"value": ""
+		},
+		"LS_Input_Raw_File_properties_typeProperties_url": {
+			"value": "https://abcdevinputstor.dfs.core.windows.net/"
+		},
+		"LS_SQLDB_properties_typeProperties_server": {
+			"value": "abc-sql-retail-dev.database.windows.net"
+		},
+		"LS_SQLDB_properties_typeProperties_database": {
+			"value": "ABCRetailDevDB"
+		},
+		"LS_SQLDB_properties_typeProperties_userName": {
+			"value": "abc-sql-retail-dev-adm"
+		},
+		"LS_abcadlsretaildev_properties_typeProperties_url": {
+			"value": "https://abcadlsretaildev.dfs.core.windows.net/"
+		}
+	}
+}
