@@ -12,7 +12,7 @@
 			},
 			"GP_POLLING_COUNT": {
 				"type": "int",
-				"value": 5
+				"value": 2
 			},
 			"GP_POLLING_WAIT_SECONDS": {
 				"type": "int",
