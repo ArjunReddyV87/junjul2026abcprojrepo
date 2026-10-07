@@ -44,14 +44,7 @@
 			{
 				"name": "Load customer",
 				"type": "ExecutePipeline",
-				"dependsOn": [
-					{
-						"activity": "Check for files",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					}
-				],
+				"dependsOn": [],
 				"policy": {
 					"secureInput": false
 				},
@@ -67,14 +60,7 @@
 			{
 				"name": "Load Product",
 				"type": "ExecutePipeline",
-				"dependsOn": [
-					{
-						"activity": "Check for files",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					}
-				],
+				"dependsOn": [],
 				"policy": {
 					"secureInput": false
 				},
