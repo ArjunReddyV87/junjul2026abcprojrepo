@@ -22,12 +22,8 @@
 					"value": "@dataset().DS_Sink_Filename",
 					"type": "Expression"
 				},
-				"folderPath": {
-					"value": "@dataset().DS_Sink_Path",
-					"type": "Expression"
-				},
 				"fileSystem": {
-					"value": "abcdev",
+					"value": "@dataset().DS_Sink_Path",
 					"type": "Expression"
 				}
 			},

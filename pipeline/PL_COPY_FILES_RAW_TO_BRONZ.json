@@ -100,6 +100,10 @@
 										"DS_Raw_Path": {
 											"value": "@item().SourcePath",
 											"type": "Expression"
+										},
+										"DS_Raw_FileName": {
+											"value": "@item().FileName",
+											"type": "Expression"
 										}
 									}
 								}
