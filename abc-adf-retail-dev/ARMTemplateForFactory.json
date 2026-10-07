@@ -213,7 +213,16 @@
 										{
 											"referenceName": "DS_Raw_File",
 											"type": "DatasetReference",
-											"parameters": {}
+											"parameters": {
+												"DS_Raw_Path": {
+													"value": "@item().SourcePath",
+													"type": "Expression"
+												},
+												"DS_Raw_FileName": {
+													"value": "@item().FileName",
+													"type": "Expression"
+												}
+											}
 										}
 									],
 									"outputs": [
@@ -225,7 +234,7 @@
 													"value": "@item().BronzePath",
 													"type": "Expression"
 												},
-												"DS_Sink_FileName": {
+												"DS_Sink_Filename": {
 													"value": "@item().FileName",
 													"type": "Expression"
 												}
@@ -390,7 +399,16 @@
 										"dataset": {
 											"referenceName": "DS_Raw_File",
 											"type": "DatasetReference",
-											"parameters": {}
+											"parameters": {
+												"DS_Raw_Path": {
+													"value": "@item().SourcePath",
+													"type": "Expression"
+												},
+												"DS_Raw_FileName": {
+													"value": "@item().FileName",
+													"type": "Expression"
+												}
+											}
 										},
 										"fieldList": [
 											"exists"
@@ -904,14 +922,27 @@
 					"referenceName": "LS_Input_Raw_File",
 					"type": "LinkedServiceReference"
 				},
+				"parameters": {
+					"DS_Raw_Path": {
+						"type": "string"
+					},
+					"DS_Raw_FileName": {
+						"type": "string"
+					}
+				},
 				"annotations": [],
 				"type": "DelimitedText",
 				"typeProperties": {
 					"location": {
 						"type": "AzureBlobFSLocation",
-						"fileName": "customer.csv",
-						"folderPath": "customer",
-						"fileSystem": "raw"
+						"fileName": {
+							"value": "@dataset().DS_Raw_FileName",
+							"type": "Expression"
+						},
+						"fileSystem": {
+							"value": "@dataset().DS_Raw_Path",
+							"type": "Expression"
+						}
 					},
 					"columnDelimiter": ",",
 					"escapeChar": "\\",
@@ -937,7 +968,7 @@
 					"DS_Sink_Path": {
 						"type": "string"
 					},
-					"DS_Sink_FileName": {
+					"DS_Sink_Filename": {
 						"type": "string"
 					}
 				},
@@ -945,7 +976,15 @@
 				"type": "DelimitedText",
 				"typeProperties": {
 					"location": {
-						"type": "AzureBlobFSLocation"
+						"type": "AzureBlobFSLocation",
+						"fileName": {
+							"value": "@dataset().DS_Sink_Filename",
+							"type": "Expression"
+						},
+						"fileSystem": {
+							"value": "@dataset().DS_Sink_Path",
+							"type": "Expression"
+						}
 					},
 					"columnDelimiter": ",",
 					"escapeChar": "\\",
