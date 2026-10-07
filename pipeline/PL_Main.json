@@ -15,7 +15,10 @@
 						"referenceName": "PL_BATCH_START",
 						"type": "PipelineReference"
 					},
-					"waitOnCompletion": true
+					"waitOnCompletion": true,
+					"parameters": {
+						"": "abc"
+					}
 				}
 			},
 			{
