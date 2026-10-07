@@ -15,10 +15,6 @@
 		"typeProperties": {
 			"location": {
 				"type": "AzureBlobFSLocation",
-				"fileName": {
-					"value": "@dataset().DS_Raw_FileName",
-					"type": "Expression"
-				},
 				"fileSystem": {
 					"value": "@dataset().DS_Raw_Path",
 					"type": "Expression"
