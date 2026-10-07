@@ -33,6 +33,10 @@
 			"GP_Logicapp_URL": {
 				"type": "string",
 				"value": "https://prod-12.centralindia.logic.azure.com:443/workflows/74912cd2c09944c4b11201ff63206431/triggers/When_an_HTTP_request_is_received/paths/invoke?api-version=2016-10-01&sp=%2Ftriggers%2FWhen_an_HTTP_request_is_received%2Frun&sv=1.0&sig=Plc4OnzlqVsgeLRSX5kMt_dgpSxFOzo8wvdUs7wF6OU"
+			},
+			"GP_EMAIL_CC": {
+				"type": "string",
+				"value": "abc"
 			}
 		},
 		"trustModeClaimForMi": {
