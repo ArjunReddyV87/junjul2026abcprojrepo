@@ -14,7 +14,7 @@
 					},
 					"activities": [
 						{
-							"name": "Execute Pipeline1",
+							"name": "File Availability Check",
 							"type": "ExecutePipeline",
 							"dependsOn": [],
 							"policy": {
@@ -44,7 +44,7 @@
 							"type": "Lookup",
 							"dependsOn": [
 								{
-									"activity": "Execute Pipeline1",
+									"activity": "File Availability Check",
 									"dependencyConditions": [
 										"Succeeded"
 									]
@@ -62,7 +62,7 @@
 								"source": {
 									"type": "AzureSqlSource",
 									"sqlReaderQuery": {
-										"value": "Select Count(*) as totfile_miscnt\nFROM LOG_FILE_POLLING\nWHERE BatchDate = @{pipeline().parameters.pBatchDate}\nAND RetryNumber  = @{variables('vRetryCount')}",
+										"value": "SELECT COUNT(*) AS totfile_miscnt\nFROM LOG_FILE_POLLING\nWHERE CAST(BatchDate AS DATE) = '@{pipeline().parameters.pBatchDate}'\n  AND RetryNumber = @{variables('vRetryCount')}\n  and FileExists <> 'T'",
 										"type": "Expression"
 									},
 									"queryTimeout": "02:00:00",
@@ -93,7 +93,7 @@
 							"typeProperties": {
 								"variableName": "vMissingCount",
 								"value": {
-									"value": "@activity('Get Missing file count').output.totfile_miscnt",
+									"value": "@activity('Get Missing file count').output.firstRow.totfile_miscnt",
 									"type": "Expression"
 								}
 							}
@@ -153,8 +153,7 @@
 		],
 		"parameters": {
 			"pBatchDate": {
-				"type": "string",
-				"defaultValue": "@formatDateTime(utcnow(),'yyyy-MM-dd')"
+				"type": "string"
 			}
 		},
 		"variables": {
@@ -171,8 +170,8 @@
 				"defaultValue": false
 			},
 			"vRetryCount_Temp": {
-				"type": "String",
-				"defaultValue": "1"
+				"type": "Integer",
+				"defaultValue": 1
 			}
 		},
 		"folder": {
