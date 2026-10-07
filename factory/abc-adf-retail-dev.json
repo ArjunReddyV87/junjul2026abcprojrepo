@@ -28,7 +28,7 @@
 			},
 			"GP_EMAIL_TO": {
 				"type": "string",
-				"value": "varjunreddy87@gmail.com"
+				"value": "kadapananiranjan@gmail.com"
 			},
 			"GP_Logicapp_URL": {
 				"type": "string",
@@ -36,7 +36,7 @@
 			},
 			"GP_EMAIL_CC": {
 				"type": "string",
-				"value": "abc"
+				"value": "kadapananiranjan@gmail.com"
 			}
 		},
 		"trustModeClaimForMi": {
