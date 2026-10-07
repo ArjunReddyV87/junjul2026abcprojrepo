@@ -5,27 +5,14 @@
 			"referenceName": "LS_Input_Raw_File",
 			"type": "LinkedServiceReference"
 		},
-		"parameters": {
-			"Raw_SourcePath": {
-				"type": "string"
-			},
-			"FileName": {
-				"type": "string"
-			}
-		},
 		"annotations": [],
 		"type": "DelimitedText",
 		"typeProperties": {
 			"location": {
 				"type": "AzureBlobFSLocation",
-				"fileName": {
-					"value": "@dataset().FileName",
-					"type": "Expression"
-				},
-				"fileSystem": {
-					"value": "@dataset().Raw_SourcePath",
-					"type": "Expression"
-				}
+				"fileName": "customer.csv",
+				"folderPath": "customer",
+				"fileSystem": "raw"
 			},
 			"columnDelimiter": ",",
 			"escapeChar": "\\",

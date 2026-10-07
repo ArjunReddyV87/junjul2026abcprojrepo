@@ -17,6 +17,7 @@
 				"typeProperties": {
 					"source": {
 						"type": "AzureSqlSource",
+						"sqlReaderQuery": "SELECT *\nFROM CTL_FILE_MASTER\nWHERE ActiveFlag ='Y'",
 						"queryTimeout": "02:00:00",
 						"partitionOption": "None"
 					},
@@ -96,10 +97,6 @@
 									"referenceName": "DS_Raw_File",
 									"type": "DatasetReference",
 									"parameters": {
-										"Raw_SourcePath": {
-											"value": "@item().SourcePath",
-											"type": "Expression"
-										},
 										"FileName": {
 											"value": "@item().FileName",
 											"type": "Expression"
