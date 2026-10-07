@@ -149,6 +149,121 @@
 					],
 					"timeout": "0.12:00:00"
 				}
+			},
+			{
+				"name": "Get Missing file count_copy1",
+				"type": "Lookup",
+				"dependsOn": [
+					{
+						"activity": "UNTIL_FILES_AVAILABLE",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureSqlSource",
+						"sqlReaderQuery": {
+							"value": "SELECT COUNT(*) AS totfile_miscnt\nFROM LOG_FILE_POLLING\nWHERE CAST(BatchDate AS DATE) = '@{pipeline().parameters.pBatchDate}'\n  AND RetryNumber = @{variables('vRetryCount')}\n  and FileExists <> 'T'",
+							"type": "Expression"
+						},
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"dataset": {
+						"referenceName": "DS_Log_file",
+						"type": "DatasetReference"
+					}
+				}
+			},
+			{
+				"name": "If Condition1",
+				"type": "IfCondition",
+				"dependsOn": [
+					{
+						"activity": "Get Missing file count_copy1",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"expression": {
+						"value": "@equals(activity('Get Missing file count_copy1').output.firstRow.totmis_filecnt,0)",
+						"type": "Expression"
+					},
+					"ifFalseActivities": [
+						{
+							"name": "Send Missing Files Email",
+							"type": "WebActivity",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"method": "POST",
+								"url": {
+									"value": "@pipeline().globalParameters.GP_Logicapp_URL",
+									"type": "Expression"
+								},
+								"body": {
+									"value": "{\n  \"to\": \"@{pipeline().globalParameters.GP_EMAIL_TO}\",\n  \"subject\": \"@{concat(pipeline().globalParameters.GP_CUSTOMER_NAME, ' ', pipeline().globalParameters.GP_ENVIRONMENT, ' Missing files ', formatDateTime(utcNow(), 'yyyyMMdd'))}\",\n  \"body\": \"Find Below Missing Files list\"\n}",
+									"type": "Expression"
+								}
+							}
+						},
+						{
+							"name": "Fail Batch",
+							"type": "Fail",
+							"dependsOn": [
+								{
+									"activity": "Send Missing Files Email",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"userProperties": [],
+							"typeProperties": {
+								"message": "Files not available",
+								"errorCode": "Files missing"
+							}
+						}
+					],
+					"ifTrueActivities": [
+						{
+							"name": "Copy Files from raw to bronze",
+							"type": "ExecutePipeline",
+							"dependsOn": [],
+							"policy": {
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"pipeline": {
+									"referenceName": "PL_COPY_FILES_RAW_TO_BRONZ",
+									"type": "PipelineReference"
+								},
+								"waitOnCompletion": true
+							}
+						}
+					]
+				}
 			}
 		],
 		"parameters": {
