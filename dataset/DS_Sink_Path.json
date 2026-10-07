@@ -1,0 +1,29 @@
+{
+	"name": "DS_Sink_Path",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "LS_abcadlsretaildev",
+			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"DS_Sink_Path": {
+				"type": "string"
+			},
+			"DS_Sink_FileName": {
+				"type": "string"
+			}
+		},
+		"annotations": [],
+		"type": "DelimitedText",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation"
+			},
+			"columnDelimiter": ",",
+			"escapeChar": "\\",
+			"firstRowAsHeader": true,
+			"quoteChar": "\""
+		},
+		"schema": []
+	}
+}
