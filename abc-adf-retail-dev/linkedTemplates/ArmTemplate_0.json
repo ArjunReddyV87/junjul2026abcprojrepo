@@ -994,6 +994,8 @@
 					{
 						"name": "Get final Missing file count",
 						"type": "Lookup",
+						"state": "Inactive",
+						"onInactiveMarkAs": "Succeeded",
 						"dependsOn": [
 							{
 								"activity": "UNTIL_FILES_AVAILABLE",
@@ -1031,6 +1033,8 @@
 					{
 						"name": "If Condition1",
 						"type": "IfCondition",
+						"state": "Inactive",
+						"onInactiveMarkAs": "Succeeded",
 						"dependsOn": [
 							{
 								"activity": "Get final Missing file count",
@@ -1159,11 +1163,11 @@
 				"variables": {
 					"vRetryCount": {
 						"type": "Integer",
-						"defaultValue": 0
+						"defaultValue": 1
 					},
 					"vMissingCount": {
 						"type": "Integer",
-						"defaultValue": 1
+						"defaultValue": 10
 					},
 					"vFileExists": {
 						"type": "Boolean",
