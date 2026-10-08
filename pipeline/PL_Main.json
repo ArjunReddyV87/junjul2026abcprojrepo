@@ -35,7 +35,7 @@
 				"userProperties": [],
 				"typeProperties": {
 					"pipeline": {
-						"referenceName": "PL_FILE_POLLING",
+						"referenceName": "PL_FILE_POLLING_Coping",
 						"type": "PipelineReference"
 					},
 					"waitOnCompletion": true

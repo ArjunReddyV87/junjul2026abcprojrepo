@@ -1,5 +1,5 @@
 {
-	"name": "PL_FILE_POLLING",
+	"name": "PL_FILE_POLLING_Coping",
 	"properties": {
 		"activities": [
 			{
@@ -145,6 +145,25 @@
 									"type": "Expression"
 								}
 							}
+						},
+						{
+							"name": "Wait time",
+							"type": "Wait",
+							"dependsOn": [
+								{
+									"activity": "Set retry cnt",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"userProperties": [],
+							"typeProperties": {
+								"waitTimeInSeconds": {
+									"value": "@pipeline().globalParameters.GP_POLLING_WAIT_SECONDS",
+									"type": "Expression"
+								}
+							}
 						}
 					],
 					"timeout": "0.12:00:00"
@@ -153,8 +172,6 @@
 			{
 				"name": "Get final Missing file count",
 				"type": "Lookup",
-				"state": "Inactive",
-				"onInactiveMarkAs": "Succeeded",
 				"dependsOn": [
 					{
 						"activity": "UNTIL_FILES_AVAILABLE",
@@ -175,7 +192,7 @@
 					"source": {
 						"type": "AzureSqlSource",
 						"sqlReaderQuery": {
-							"value": "SELECT COUNT(*) totfile_miscnt\nFROM LOG_FILE_POLLING\nWHERE CAST(BatchDate AS DATE) = '@{pipeline().parameters.pBatchDate}'\n  AND RetryNumber = 0\n  and FileExists <> 'T'",
+							"value": "SELECT COUNT(*) totfile_miscnt\nFROM LOG_FILE_POLLING\nWHERE CAST(BatchDate AS DATE) = '@{pipeline().parameters.pBatchDate}'\n  AND RetryNumber = @{variables('vRetryCount')} - 1\n  and FileExists <> 'T'",
 							"type": "Expression"
 						},
 						"queryTimeout": "02:00:00",
@@ -191,8 +208,6 @@
 			{
 				"name": "If Condition1",
 				"type": "IfCondition",
-				"state": "Inactive",
-				"onInactiveMarkAs": "Succeeded",
 				"dependsOn": [
 					{
 						"activity": "Get final Missing file count",
@@ -272,7 +287,7 @@
 								"source": {
 									"type": "AzureSqlSource",
 									"sqlReaderQuery": {
-										"value": "SELECT FileID\n,FileName\nFROM LOG_FILE_POLLING\nWHERE CAST(BatchDate AS DATE) = '@{pipeline().parameters.pBatchDate}'\n  AND RetryNumber = 0\n  and FileExists <> 'T'",
+										"value": "SELECT FileID\n,FileName\nFROM LOG_FILE_POLLING\nWHERE CAST(BatchDate AS DATE) = '@{pipeline().parameters.pBatchDate}'\n  AND RetryNumber = @{variables('vRetryCount')} - 1\n  and FileExists <> 'T'",
 										"type": "Expression"
 									},
 									"queryTimeout": "02:00:00",
