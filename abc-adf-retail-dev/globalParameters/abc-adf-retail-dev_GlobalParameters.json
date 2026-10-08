@@ -9,11 +9,11 @@
 	},
 	"GP_POLLING_COUNT": {
 		"type": "int",
-		"value": 3
+		"value": 2
 	},
 	"GP_POLLING_WAIT_SECONDS": {
 		"type": "int",
-		"value": 60
+		"value": 5
 	},
 	"GP_BATCH_SLA_MINUTES": {
 		"type": "int",

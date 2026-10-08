@@ -837,7 +837,7 @@
 			]
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/PL_FILE_POLLING')]",
+			"name": "[concat(parameters('factoryName'), '/PL_FILE_POLLING_Coping')]",
 			"type": "Microsoft.DataFactory/factories/pipelines",
 			"apiVersion": "2018-06-01",
 			"properties": {
@@ -986,6 +986,25 @@
 											"type": "Expression"
 										}
 									}
+								},
+								{
+									"name": "Wait time",
+									"type": "Wait",
+									"dependsOn": [
+										{
+											"activity": "Set retry cnt",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"userProperties": [],
+									"typeProperties": {
+										"waitTimeInSeconds": {
+											"value": "@pipeline().globalParameters.GP_POLLING_WAIT_SECONDS",
+											"type": "Expression"
+										}
+									}
 								}
 							],
 							"timeout": "0.12:00:00"
@@ -994,8 +1013,6 @@
 					{
 						"name": "Get final Missing file count",
 						"type": "Lookup",
-						"state": "Inactive",
-						"onInactiveMarkAs": "Succeeded",
 						"dependsOn": [
 							{
 								"activity": "UNTIL_FILES_AVAILABLE",
@@ -1016,7 +1033,7 @@
 							"source": {
 								"type": "AzureSqlSource",
 								"sqlReaderQuery": {
-									"value": "SELECT COUNT(*) totfile_miscnt\nFROM LOG_FILE_POLLING\nWHERE CAST(BatchDate AS DATE) = '@{pipeline().parameters.pBatchDate}'\n  AND RetryNumber = 0\n  and FileExists <> 'T'",
+									"value": "SELECT COUNT(*) totfile_miscnt\nFROM LOG_FILE_POLLING\nWHERE CAST(BatchDate AS DATE) = '@{pipeline().parameters.pBatchDate}'\n  AND RetryNumber = @{variables('vRetryCount')} - 1\n  and FileExists <> 'T'",
 									"type": "Expression"
 								},
 								"queryTimeout": "02:00:00",
@@ -1033,8 +1050,6 @@
 					{
 						"name": "If Condition1",
 						"type": "IfCondition",
-						"state": "Inactive",
-						"onInactiveMarkAs": "Succeeded",
 						"dependsOn": [
 							{
 								"activity": "Get final Missing file count",
@@ -1115,7 +1130,7 @@
 										"source": {
 											"type": "AzureSqlSource",
 											"sqlReaderQuery": {
-												"value": "SELECT FileID\n,FileName\nFROM LOG_FILE_POLLING\nWHERE CAST(BatchDate AS DATE) = '@{pipeline().parameters.pBatchDate}'\n  AND RetryNumber = 0\n  and FileExists <> 'T'",
+												"value": "SELECT FileID\n,FileName\nFROM LOG_FILE_POLLING\nWHERE CAST(BatchDate AS DATE) = '@{pipeline().parameters.pBatchDate}'\n  AND RetryNumber = @{variables('vRetryCount')} - 1\n  and FileExists <> 'T'",
 												"type": "Expression"
 											},
 											"queryTimeout": "02:00:00",
@@ -1229,7 +1244,7 @@
 						"userProperties": [],
 						"typeProperties": {
 							"pipeline": {
-								"referenceName": "PL_FILE_POLLING",
+								"referenceName": "PL_FILE_POLLING_Coping",
 								"type": "PipelineReference"
 							},
 							"waitOnCompletion": true,
@@ -1335,7 +1350,7 @@
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/pipelines/PL_BATCH_START')]",
-				"[concat(variables('factoryId'), '/pipelines/PL_FILE_POLLING')]",
+				"[concat(variables('factoryId'), '/pipelines/PL_FILE_POLLING_Coping')]",
 				"[concat(variables('factoryId'), '/pipelines/PL_LOAD_CUSTOMER')]",
 				"[concat(variables('factoryId'), '/pipelines/PL_LOAD_PRODUCT')]",
 				"[concat(variables('factoryId'), '/pipelines/PL_LOAD_SALES')]",
