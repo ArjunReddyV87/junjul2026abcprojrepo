@@ -1,0 +1,110 @@
+{
+	"name": "PL_BRONZE_LOAD",
+	"properties": {
+		"activities": [
+			{
+				"name": "LKP_BRONZE_FILES",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureSqlSource",
+						"sqlReaderQuery": "SELECT\n    FileID,\n    FileName,\n    FolderName,\n    SourcePath\nFROM CTL_FILE_MASTER\nWHERE ActiveFlag = 'Y'\nORDER BY FileID;",
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"dataset": {
+						"referenceName": "DS_Control_tbl",
+						"type": "DatasetReference"
+					},
+					"firstRowOnly": false
+				}
+			},
+			{
+				"name": "FE_BRONZE_FILES",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "LKP_BRONZE_FILES",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('LKP_BRONZE_FILES').output.value",
+						"type": "Expression"
+					},
+					"isSequential": true,
+					"activities": [
+						{
+							"name": "NB_BRONZE_LOAD",
+							"type": "DatabricksNotebook",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"notebookPath": "/abcdev/nb_bronze_load",
+								"baseParameters": {
+									"base_path": {
+										"value": "@pipeline().globalParameters.GP_ADLS_BASE_PATH",
+										"type": "Expression"
+									},
+									"folder_name": {
+										"value": "@item().FolderName",
+										"type": "Expression"
+									},
+									"file_name": {
+										"value": "@item().FileName",
+										"type": "Expression"
+									},
+									"table_name": {
+										"value": "@item().FolderName",
+										"type": "Expression"
+									},
+									"batch_date": {
+										"value": "@pipeline().parameters.pBatchDate",
+										"type": "Expression"
+									},
+									"batch_id": {
+										"value": "@pipeline().parameters.pBatchID",
+										"type": "Expression"
+									}
+								}
+							},
+							"linkedServiceName": {
+								"referenceName": "LS_DataBricks",
+								"type": "LinkedServiceReference"
+							}
+						}
+					]
+				}
+			}
+		],
+		"parameters": {
+			"pBatchDate": {
+				"type": "string"
+			},
+			"pBatchID": {
+				"type": "string"
+			}
+		},
+		"annotations": []
+	}
+}
