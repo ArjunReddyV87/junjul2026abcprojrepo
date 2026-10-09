@@ -41,6 +41,10 @@
 			"GP_CUSTOMER_NAME": {
 				"type": "string",
 				"value": "ABC"
+			},
+			"GP_ADLS_BASE_PATH": {
+				"type": "string",
+				"value": "abfss://abcdev@abcadlsretaildev.dfs.core.windows.net/bronze/"
 			}
 		},
 		"trustModeClaimForMi": {
