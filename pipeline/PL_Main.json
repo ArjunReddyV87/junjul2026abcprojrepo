@@ -38,94 +38,21 @@
 						"referenceName": "PL_FILE_POLLING_Coping",
 						"type": "PipelineReference"
 					},
-					"waitOnCompletion": true
-				}
-			},
-			{
-				"name": "Load customer",
-				"type": "ExecutePipeline",
-				"dependsOn": [],
-				"policy": {
-					"secureInput": false
-				},
-				"userProperties": [],
-				"typeProperties": {
-					"pipeline": {
-						"referenceName": "PL_LOAD_CUSTOMER",
-						"type": "PipelineReference"
-					},
-					"waitOnCompletion": true
-				}
-			},
-			{
-				"name": "Load Product",
-				"type": "ExecutePipeline",
-				"dependsOn": [],
-				"policy": {
-					"secureInput": false
-				},
-				"userProperties": [],
-				"typeProperties": {
-					"pipeline": {
-						"referenceName": "PL_LOAD_PRODUCT",
-						"type": "PipelineReference"
-					},
-					"waitOnCompletion": true
-				}
-			},
-			{
-				"name": "Load sales",
-				"type": "ExecutePipeline",
-				"dependsOn": [
-					{
-						"activity": "Load customer",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					},
-					{
-						"activity": "Load Product",
-						"dependencyConditions": [
-							"Succeeded"
-						]
+					"waitOnCompletion": true,
+					"parameters": {
+						"pBatchDate": {
+							"value": "@pipeline().parameters.pbatchdate",
+							"type": "Expression"
+						}
 					}
-				],
-				"policy": {
-					"secureInput": false
-				},
-				"userProperties": [],
-				"typeProperties": {
-					"pipeline": {
-						"referenceName": "PL_LOAD_SALES",
-						"type": "PipelineReference"
-					},
-					"waitOnCompletion": true
-				}
-			},
-			{
-				"name": "Data load to silver status",
-				"type": "ExecutePipeline",
-				"dependsOn": [
-					{
-						"activity": "Load sales",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					}
-				],
-				"policy": {
-					"secureInput": false
-				},
-				"userProperties": [],
-				"typeProperties": {
-					"pipeline": {
-						"referenceName": "PL_Git_Test",
-						"type": "PipelineReference"
-					},
-					"waitOnCompletion": true
 				}
 			}
 		],
+		"parameters": {
+			"pbatchdate": {
+				"type": "string"
+			}
+		},
 		"folder": {
 			"name": "ABC_Dev"
 		},
