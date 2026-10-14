@@ -46,10 +46,75 @@
 						}
 					}
 				}
+			},
+			{
+				"name": "Bronze file to bronze tables load",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "Check for files",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "PL_BRONZE_LOAD",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"pBatchDate": {
+							"value": "@pipeline().parameters.pbatchdate",
+							"type": "Expression"
+						},
+						"pBatchID": {
+							"value": "@pipeline().parameters.pbatchID",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			{
+				"name": "Bronze to silver load",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "Bronze file to bronze tables load",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "PL_Bronze_to_Silver",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"pbatchid": {
+							"value": "@pipeline().parameters.pbatchID",
+							"type": "Expression"
+						}
+					}
+				}
 			}
 		],
 		"parameters": {
 			"pbatchdate": {
+				"type": "string"
+			},
+			"pbatchID": {
 				"type": "string"
 			}
 		},

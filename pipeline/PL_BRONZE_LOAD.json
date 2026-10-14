@@ -105,6 +105,9 @@
 				"type": "string"
 			}
 		},
+		"folder": {
+			"name": "ABC_Dev"
+		},
 		"annotations": []
 	}
 }
