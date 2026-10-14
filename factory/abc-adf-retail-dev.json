@@ -24,7 +24,7 @@
 			},
 			"GP_ARCHIVE_DAYS": {
 				"type": "int",
-				"value": 30
+				"value": 1
 			},
 			"GP_EMAIL_TO": {
 				"type": "string",
