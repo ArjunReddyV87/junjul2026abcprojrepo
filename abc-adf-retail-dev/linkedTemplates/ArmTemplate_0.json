@@ -7,6 +7,10 @@
 			"metadata": "Data Factory name",
 			"defaultValue": "abc-adf-retail-dev"
 		},
+		"LS_DataBricks_accessToken": {
+			"type": "secureString",
+			"metadata": "Secure string for 'accessToken' of 'LS_DataBricks'"
+		},
 		"LS_Input_Raw_File_accountKey": {
 			"type": "secureString",
 			"metadata": "Secure string for 'accountKey' of 'LS_Input_Raw_File'"
@@ -19,9 +23,9 @@
 			"type": "secureString",
 			"metadata": "Secure string for 'accountKey' of 'LS_abcadlsretaildev'"
 		},
-		"LS_DataBricks_accessToken": {
-			"type": "secureString",
-			"metadata": "Secure string for 'accessToken' of 'LS_DataBricks'"
+		"LS_DataBricks_properties_typeProperties_existingClusterId": {
+			"type": "string",
+			"defaultValue": "1009-195026-mlfqubob"
 		},
 		"LS_Input_Raw_File_properties_typeProperties_url": {
 			"type": "string",
@@ -42,42 +46,12 @@
 		"LS_abcadlsretaildev_properties_typeProperties_url": {
 			"type": "string",
 			"defaultValue": "https://abcadlsretaildev.dfs.core.windows.net/"
-		},
-		"LS_DataBricks_properties_typeProperties_existingClusterId": {
-			"type": "string",
-			"defaultValue": "1009-195026-mlfqubob"
 		}
 	},
 	"variables": {
 		"factoryId": "[concat('Microsoft.DataFactory/factories/', parameters('factoryName'))]"
 	},
 	"resources": [
-		{
-			"name": "[concat(parameters('factoryName'), '/PL_ARCHIVE')]",
-			"type": "Microsoft.DataFactory/factories/pipelines",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"activities": [
-					{
-						"name": "Wait1",
-						"type": "Wait",
-						"dependsOn": [],
-						"userProperties": [],
-						"typeProperties": {
-							"waitTimeInSeconds": 1
-						}
-					}
-				],
-				"policy": {
-					"elapsedTimeMetric": {}
-				},
-				"folder": {
-					"name": "ABC_Dev"
-				},
-				"annotations": []
-			},
-			"dependsOn": []
-		},
 		{
 			"name": "[concat(parameters('factoryName'), '/PL_BATCH_START')]",
 			"type": "Microsoft.DataFactory/factories/pipelines",
@@ -173,106 +147,20 @@
 			"dependsOn": []
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/PL_LOAD_CUSTOMER')]",
-			"type": "Microsoft.DataFactory/factories/pipelines",
+			"name": "[concat(parameters('factoryName'), '/LS_DataBricks')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
 			"apiVersion": "2018-06-01",
 			"properties": {
-				"activities": [
-					{
-						"name": "Wait1",
-						"type": "Wait",
-						"dependsOn": [],
-						"userProperties": [],
-						"typeProperties": {
-							"waitTimeInSeconds": 1
-						}
-					}
-				],
-				"policy": {
-					"elapsedTimeMetric": {}
-				},
-				"folder": {
-					"name": "ABC_Dev"
-				},
-				"annotations": []
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/PL_LOAD_PRODUCT')]",
-			"type": "Microsoft.DataFactory/factories/pipelines",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"activities": [
-					{
-						"name": "Wait1",
-						"type": "Wait",
-						"dependsOn": [],
-						"userProperties": [],
-						"typeProperties": {
-							"waitTimeInSeconds": 1
-						}
-					}
-				],
-				"policy": {
-					"elapsedTimeMetric": {}
-				},
-				"folder": {
-					"name": "ABC_Dev"
-				},
-				"annotations": []
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/PL_LOAD_SALES')]",
-			"type": "Microsoft.DataFactory/factories/pipelines",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"activities": [
-					{
-						"name": "Wait1",
-						"type": "Wait",
-						"dependsOn": [],
-						"userProperties": [],
-						"typeProperties": {
-							"waitTimeInSeconds": 1
-						}
-					}
-				],
-				"policy": {
-					"elapsedTimeMetric": {}
-				},
-				"folder": {
-					"name": "ABC_Dev"
-				},
-				"annotations": []
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/PL_purging')]",
-			"type": "Microsoft.DataFactory/factories/pipelines",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"activities": [
-					{
-						"name": "Wait1",
-						"type": "Wait",
-						"dependsOn": [],
-						"userProperties": [],
-						"typeProperties": {
-							"waitTimeInSeconds": 1
-						}
-					}
-				],
-				"policy": {
-					"elapsedTimeMetric": {}
-				},
-				"folder": {
-					"name": "ABC_Dev"
-				},
-				"annotations": []
+				"annotations": [],
+				"type": "AzureDatabricks",
+				"typeProperties": {
+					"domain": "https://adb-7405617749140414.14.azuredatabricks.net",
+					"accessToken": {
+						"type": "SecureString",
+						"value": "[parameters('LS_DataBricks_accessToken')]"
+					},
+					"existingClusterId": "[parameters('LS_DataBricks_properties_typeProperties_existingClusterId')]"
+				}
 			},
 			"dependsOn": []
 		},
@@ -343,22 +231,135 @@
 			"dependsOn": []
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/LS_DataBricks')]",
-			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"name": "[concat(parameters('factoryName'), '/PL_Gold_Load')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
 			"apiVersion": "2018-06-01",
 			"properties": {
-				"annotations": [],
-				"type": "AzureDatabricks",
-				"typeProperties": {
-					"domain": "https://adb-7405617749140414.14.azuredatabricks.net",
-					"accessToken": {
-						"type": "SecureString",
-						"value": "[parameters('LS_DataBricks_accessToken')]"
-					},
-					"existingClusterId": "[parameters('LS_DataBricks_properties_typeProperties_existingClusterId')]"
-				}
+				"activities": [
+					{
+						"name": "Load sink to Gold",
+						"type": "DatabricksNotebook",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"notebookPath": "/abcdev/nb_gold_load_2",
+							"baseParameters": {
+								"batch_id": {
+									"value": "@pipeline().parameters.pBatchid",
+									"type": "Expression"
+								}
+							}
+						},
+						"linkedServiceName": {
+							"referenceName": "LS_DataBricks",
+							"type": "LinkedServiceReference"
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"parameters": {
+					"pBatchid": {
+						"type": "string"
+					}
+				},
+				"folder": {
+					"name": "ABC_Dev"
+				},
+				"annotations": []
 			},
-			"dependsOn": []
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/LS_DataBricks')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DS_ArchivePath')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_abcadlsretaildev",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"batchid": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"folderPath": {
+							"value": "@concat('archive','/',dataset().batchid)",
+							"type": "Expression"
+						},
+						"fileSystem": "abcdev"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/LS_abcadlsretaildev')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DS_Bronze')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_abcadlsretaildev",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"folderPath": "bronze",
+						"fileSystem": "abcdev"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": [
+					{
+						"name": "customer_id",
+						"type": "String"
+					},
+					{
+						"name": "customer_name",
+						"type": "String"
+					},
+					{
+						"name": "email",
+						"type": "String"
+					},
+					{
+						"name": "city",
+						"type": "String"
+					}
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/LS_abcadlsretaildev')]"
+			]
 		},
 		{
 			"name": "[concat(parameters('factoryName'), '/DS_Control_tbl')]",
@@ -526,6 +527,369 @@
 			]
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/PL_ARCHIVE')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "COPY_BRONZE_TO_ARCHIVE",
+						"type": "Copy",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "DelimitedTextSource",
+								"storeSettings": {
+									"type": "AzureBlobFSReadSettings",
+									"recursive": true,
+									"wildcardFileName": "*",
+									"enablePartitionDiscovery": false
+								},
+								"formatSettings": {
+									"type": "DelimitedTextReadSettings"
+								}
+							},
+							"sink": {
+								"type": "DelimitedTextSink",
+								"storeSettings": {
+									"type": "AzureBlobFSWriteSettings"
+								},
+								"formatSettings": {
+									"type": "DelimitedTextWriteSettings",
+									"quoteAllText": true,
+									"fileExtension": ".txt"
+								}
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "DS_Bronze",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "DS_ArchivePath",
+								"type": "DatasetReference",
+								"parameters": {
+									"batchid": {
+										"value": "@pipeline().parameters.pBatchID",
+										"type": "Expression"
+									}
+								}
+							}
+						]
+					},
+					{
+						"name": "Delete Bronze files",
+						"type": "Delete",
+						"dependsOn": [
+							{
+								"activity": "COPY_BRONZE_TO_ARCHIVE",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataset": {
+								"referenceName": "DS_Bronze",
+								"type": "DatasetReference",
+								"parameters": {}
+							},
+							"logStorageSettings": {
+								"linkedServiceName": {
+									"referenceName": "LS_abcadlsretaildev",
+									"type": "LinkedServiceReference"
+								},
+								"path": "abcdev/log"
+							},
+							"enableLogging": true,
+							"storeSettings": {
+								"type": "AzureBlobFSReadSettings",
+								"recursive": true,
+								"wildcardFileName": "*",
+								"enablePartitionDiscovery": false
+							}
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"parameters": {
+					"pBatchID": {
+						"type": "string"
+					},
+					"pBatchDate": {
+						"type": "string"
+					}
+				},
+				"folder": {
+					"name": "ABC_Dev"
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/DS_Bronze')]",
+				"[concat(variables('factoryId'), '/datasets/DS_ArchivePath')]",
+				"[concat(variables('factoryId'), '/linkedServices/LS_abcadlsretaildev')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/PL_BRONZE_LOAD')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "LKP_BRONZE_FILES",
+						"type": "Lookup",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureSqlSource",
+								"sqlReaderQuery": "SELECT\n    FileID,\n    FileName,\n    FolderName,\n    SourcePath\nFROM CTL_FILE_MASTER\nWHERE ActiveFlag = 'Y'\nORDER BY FileID;",
+								"queryTimeout": "02:00:00",
+								"partitionOption": "None"
+							},
+							"dataset": {
+								"referenceName": "DS_Control_tbl",
+								"type": "DatasetReference",
+								"parameters": {}
+							},
+							"firstRowOnly": false
+						}
+					},
+					{
+						"name": "FE_BRONZE_FILES",
+						"type": "ForEach",
+						"dependsOn": [
+							{
+								"activity": "LKP_BRONZE_FILES",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@activity('LKP_BRONZE_FILES').output.value",
+								"type": "Expression"
+							},
+							"isSequential": true,
+							"activities": [
+								{
+									"name": "NB_BRONZE_LOAD",
+									"type": "DatabricksNotebook",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "0.12:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"notebookPath": "/abcdev/nb_bronze_load",
+										"baseParameters": {
+											"base_path": {
+												"value": "@pipeline().globalParameters.GP_ADLS_BASE_PATH",
+												"type": "Expression"
+											},
+											"folder_name": {
+												"value": "@item().FolderName",
+												"type": "Expression"
+											},
+											"file_name": {
+												"value": "@item().FileName",
+												"type": "Expression"
+											},
+											"table_name": {
+												"value": "@item().FolderName",
+												"type": "Expression"
+											},
+											"batch_date": {
+												"value": "@pipeline().parameters.pBatchDate",
+												"type": "Expression"
+											},
+											"batch_id": {
+												"value": "@pipeline().parameters.pBatchID",
+												"type": "Expression"
+											}
+										}
+									},
+									"linkedServiceName": {
+										"referenceName": "LS_DataBricks",
+										"type": "LinkedServiceReference"
+									}
+								}
+							]
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"parameters": {
+					"pBatchDate": {
+						"type": "string"
+					},
+					"pBatchID": {
+						"type": "string"
+					}
+				},
+				"folder": {
+					"name": "ABC_Dev"
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/DS_Control_tbl')]",
+				"[concat(variables('factoryId'), '/linkedServices/LS_DataBricks')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/PL_Bronze_to_Silver')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "LKP_BRONZE_FILES",
+						"type": "Lookup",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureSqlSource",
+								"sqlReaderQuery": "SELECT\n    FolderName\nFROM CTL_FILE_MASTER\nWHERE ActiveFlag = 'Y'\nORDER BY FileID;",
+								"queryTimeout": "02:00:00",
+								"partitionOption": "None"
+							},
+							"dataset": {
+								"referenceName": "DS_Control_tbl",
+								"type": "DatasetReference",
+								"parameters": {}
+							},
+							"firstRowOnly": false
+						}
+					},
+					{
+						"name": "FE_bronze to silver",
+						"type": "ForEach",
+						"dependsOn": [
+							{
+								"activity": "LKP_BRONZE_FILES",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@activity('LKP_BRONZE_FILES').output.value",
+								"type": "Expression"
+							},
+							"isSequential": true,
+							"activities": [
+								{
+									"name": "NB_silver_Load",
+									"type": "DatabricksNotebook",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "0.12:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"notebookPath": "/abcdev/nb_silver_load",
+										"baseParameters": {
+											"table_name": {
+												"value": "@item().FolderName",
+												"type": "Expression"
+											},
+											"batch_id": {
+												"value": "@pipeline().parameters.pBatchID",
+												"type": "Expression"
+											}
+										}
+									},
+									"linkedServiceName": {
+										"referenceName": "LS_DataBricks",
+										"type": "LinkedServiceReference"
+									}
+								}
+							]
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"parameters": {
+					"pbatchid": {
+						"type": "string"
+					}
+				},
+				"folder": {
+					"name": "ABC_Dev"
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/DS_Control_tbl')]",
+				"[concat(variables('factoryId'), '/linkedServices/LS_DataBricks')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/PL_COPY_FILES_RAW_TO_BRONZ')]",
 			"type": "Microsoft.DataFactory/factories/pipelines",
 			"apiVersion": "2018-06-01",
@@ -671,6 +1035,141 @@
 				"[concat(variables('factoryId'), '/datasets/DS_Control_tbl')]",
 				"[concat(variables('factoryId'), '/datasets/DS_Raw_File')]",
 				"[concat(variables('factoryId'), '/datasets/DS_Sink_Path')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/PL_FILE_PURGE')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "GM_ARCHIVE_FILES",
+						"type": "GetMetadata",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataset": {
+								"referenceName": "DS_ArchivePath",
+								"type": "DatasetReference",
+								"parameters": {
+									"batchid": {
+										"value": "@pipeline().parameters.batchid",
+										"type": "Expression"
+									}
+								}
+							},
+							"fieldList": [
+								"childItems"
+							],
+							"storeSettings": {
+								"type": "AzureBlobFSReadSettings",
+								"recursive": true,
+								"enablePartitionDiscovery": false
+							},
+							"formatSettings": {
+								"type": "DelimitedTextReadSettings"
+							}
+						}
+					},
+					{
+						"name": "FE_ARCHIVE_FOLDERS",
+						"type": "ForEach",
+						"dependsOn": [
+							{
+								"activity": "GM_ARCHIVE_FILES",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@activity('GM_ARCHIVE_FILES').output.childItems",
+								"type": "Expression"
+							},
+							"isSequential": true,
+							"activities": [
+								{
+									"name": "Check files more than retention",
+									"type": "IfCondition",
+									"dependsOn": [],
+									"userProperties": [],
+									"typeProperties": {
+										"expression": {
+											"value": "@and(\n    equals(item().type, 'Folder'),\n    less(\n        item().name,\n        formatDateTime(\n            addDays(utcnow(), mul(-1,pipeline().globalParameters.GP_ARCHIVE_DAYS)),\n            'yyyyMMddHHmmss'\n        )\n    )\n)",
+											"type": "Expression"
+										},
+										"ifTrueActivities": [
+											{
+												"name": "DEL_OLD_BATCH",
+												"type": "Delete",
+												"dependsOn": [],
+												"policy": {
+													"timeout": "0.12:00:00",
+													"retry": 0,
+													"retryIntervalInSeconds": 30,
+													"secureOutput": false,
+													"secureInput": false
+												},
+												"userProperties": [],
+												"typeProperties": {
+													"dataset": {
+														"referenceName": "DS_ArchivePath",
+														"type": "DatasetReference",
+														"parameters": {
+															"batchid": {
+																"value": "@item().name",
+																"type": "Expression"
+															}
+														}
+													},
+													"logStorageSettings": {
+														"linkedServiceName": {
+															"referenceName": "LS_abcadlsretaildev",
+															"type": "LinkedServiceReference"
+														},
+														"path": "abcdev/log"
+													},
+													"enableLogging": true,
+													"storeSettings": {
+														"type": "AzureBlobFSReadSettings",
+														"recursive": true,
+														"enablePartitionDiscovery": false
+													}
+												}
+											}
+										]
+									}
+								}
+							]
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"parameters": {
+					"batchid": {
+						"type": "string"
+					}
+				},
+				"folder": {
+					"name": "ABC_Dev"
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/DS_ArchivePath')]",
+				"[concat(variables('factoryId'), '/linkedServices/LS_abcadlsretaildev')]"
 			]
 		},
 		{
@@ -860,526 +1359,6 @@
 				"[concat(variables('factoryId'), '/datasets/DS_Control_tbl')]",
 				"[concat(variables('factoryId'), '/datasets/DS_Raw_File')]",
 				"[concat(variables('factoryId'), '/linkedServices/LS_SQLDB')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/PL_BRONZE_LOAD')]",
-			"type": "Microsoft.DataFactory/factories/pipelines",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"activities": [
-					{
-						"name": "LKP_BRONZE_FILES",
-						"type": "Lookup",
-						"dependsOn": [],
-						"policy": {
-							"timeout": "0.12:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"source": {
-								"type": "AzureSqlSource",
-								"sqlReaderQuery": "SELECT\n    FileID,\n    FileName,\n    FolderName,\n    SourcePath\nFROM CTL_FILE_MASTER\nWHERE ActiveFlag = 'Y'\nORDER BY FileID;",
-								"queryTimeout": "02:00:00",
-								"partitionOption": "None"
-							},
-							"dataset": {
-								"referenceName": "DS_Control_tbl",
-								"type": "DatasetReference",
-								"parameters": {}
-							},
-							"firstRowOnly": false
-						}
-					},
-					{
-						"name": "FE_BRONZE_FILES",
-						"type": "ForEach",
-						"dependsOn": [
-							{
-								"activity": "LKP_BRONZE_FILES",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
-						"userProperties": [],
-						"typeProperties": {
-							"items": {
-								"value": "@activity('LKP_BRONZE_FILES').output.value",
-								"type": "Expression"
-							},
-							"isSequential": true,
-							"activities": [
-								{
-									"name": "NB_BRONZE_LOAD",
-									"type": "DatabricksNotebook",
-									"dependsOn": [],
-									"policy": {
-										"timeout": "0.12:00:00",
-										"retry": 0,
-										"retryIntervalInSeconds": 30,
-										"secureOutput": false,
-										"secureInput": false
-									},
-									"userProperties": [],
-									"typeProperties": {
-										"notebookPath": "/abcdev/nb_bronze_load",
-										"baseParameters": {
-											"base_path": {
-												"value": "@pipeline().globalParameters.GP_ADLS_BASE_PATH",
-												"type": "Expression"
-											},
-											"folder_name": {
-												"value": "@item().FolderName",
-												"type": "Expression"
-											},
-											"file_name": {
-												"value": "@item().FileName",
-												"type": "Expression"
-											},
-											"table_name": {
-												"value": "@item().FolderName",
-												"type": "Expression"
-											},
-											"batch_date": {
-												"value": "@pipeline().parameters.pBatchDate",
-												"type": "Expression"
-											},
-											"batch_id": {
-												"value": "@pipeline().parameters.pBatchID",
-												"type": "Expression"
-											}
-										}
-									},
-									"linkedServiceName": {
-										"referenceName": "LS_DataBricks",
-										"type": "LinkedServiceReference"
-									}
-								}
-							]
-						}
-					}
-				],
-				"policy": {
-					"elapsedTimeMetric": {}
-				},
-				"parameters": {
-					"pBatchDate": {
-						"type": "string"
-					},
-					"pBatchID": {
-						"type": "string"
-					}
-				},
-				"annotations": []
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/datasets/DS_Control_tbl')]",
-				"[concat(variables('factoryId'), '/linkedServices/LS_DataBricks')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/PL_FILE_POLLING_Coping')]",
-			"type": "Microsoft.DataFactory/factories/pipelines",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"activities": [
-					{
-						"name": "UNTIL_FILES_AVAILABLE",
-						"type": "Until",
-						"dependsOn": [],
-						"userProperties": [],
-						"typeProperties": {
-							"expression": {
-								"value": "@or(\n    equals(variables('vMissingCount'),0),\n    greaterOrEquals(\n        variables('vRetryCount'),\n        pipeline().globalParameters.GP_POLLING_COUNT\n    )\n)",
-								"type": "Expression"
-							},
-							"activities": [
-								{
-									"name": "File Availability Check",
-									"type": "ExecutePipeline",
-									"dependsOn": [],
-									"policy": {
-										"secureInput": false
-									},
-									"userProperties": [],
-									"typeProperties": {
-										"pipeline": {
-											"referenceName": "PL_File_Check",
-											"type": "PipelineReference"
-										},
-										"waitOnCompletion": true,
-										"parameters": {
-											"pbatchdate": {
-												"value": "@pipeline().parameters.pBatchDate",
-												"type": "Expression"
-											},
-											"pretrycnt": {
-												"value": "@variables('vRetryCount')",
-												"type": "Expression"
-											}
-										}
-									}
-								},
-								{
-									"name": "Get Missing file count",
-									"type": "Lookup",
-									"dependsOn": [
-										{
-											"activity": "File Availability Check",
-											"dependencyConditions": [
-												"Succeeded"
-											]
-										}
-									],
-									"policy": {
-										"timeout": "0.12:00:00",
-										"retry": 0,
-										"retryIntervalInSeconds": 30,
-										"secureOutput": false,
-										"secureInput": false
-									},
-									"userProperties": [],
-									"typeProperties": {
-										"source": {
-											"type": "AzureSqlSource",
-											"sqlReaderQuery": {
-												"value": "SELECT COUNT(*) AS totfile_miscnt\nFROM LOG_FILE_POLLING\nWHERE CAST(BatchDate AS DATE) = '@{pipeline().parameters.pBatchDate}'\n  AND RetryNumber = @{variables('vRetryCount')}\n  and FileExists <> 'T'",
-												"type": "Expression"
-											},
-											"queryTimeout": "02:00:00",
-											"partitionOption": "None"
-										},
-										"dataset": {
-											"referenceName": "DS_Log_file",
-											"type": "DatasetReference",
-											"parameters": {}
-										}
-									}
-								},
-								{
-									"name": "Assign Missing file count",
-									"type": "SetVariable",
-									"dependsOn": [
-										{
-											"activity": "Get Missing file count",
-											"dependencyConditions": [
-												"Succeeded"
-											]
-										}
-									],
-									"policy": {
-										"secureOutput": false,
-										"secureInput": false
-									},
-									"userProperties": [],
-									"typeProperties": {
-										"variableName": "vMissingCount",
-										"value": {
-											"value": "@activity('Get Missing file count').output.firstRow.totfile_miscnt",
-											"type": "Expression"
-										}
-									}
-								},
-								{
-									"name": "Set retry temp",
-									"type": "SetVariable",
-									"dependsOn": [
-										{
-											"activity": "Get Missing file count",
-											"dependencyConditions": [
-												"Succeeded"
-											]
-										}
-									],
-									"policy": {
-										"secureOutput": false,
-										"secureInput": false
-									},
-									"userProperties": [],
-									"typeProperties": {
-										"variableName": "vRetryCount_Temp",
-										"value": {
-											"value": "@variables('vRetryCount')",
-											"type": "Expression"
-										}
-									}
-								},
-								{
-									"name": "Set retry cnt",
-									"type": "SetVariable",
-									"dependsOn": [
-										{
-											"activity": "Set retry temp",
-											"dependencyConditions": [
-												"Succeeded"
-											]
-										}
-									],
-									"policy": {
-										"secureOutput": false,
-										"secureInput": false
-									},
-									"userProperties": [],
-									"typeProperties": {
-										"variableName": "vRetryCount",
-										"value": {
-											"value": "@add(variables('vRetryCount_Temp'),1)",
-											"type": "Expression"
-										}
-									}
-								},
-								{
-									"name": "Wait time",
-									"type": "Wait",
-									"dependsOn": [
-										{
-											"activity": "Set retry cnt",
-											"dependencyConditions": [
-												"Succeeded"
-											]
-										}
-									],
-									"userProperties": [],
-									"typeProperties": {
-										"waitTimeInSeconds": {
-											"value": "@pipeline().globalParameters.GP_POLLING_WAIT_SECONDS",
-											"type": "Expression"
-										}
-									}
-								}
-							],
-							"timeout": "0.12:00:00"
-						}
-					},
-					{
-						"name": "Get final Missing file count",
-						"type": "Lookup",
-						"dependsOn": [
-							{
-								"activity": "UNTIL_FILES_AVAILABLE",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
-						"policy": {
-							"timeout": "0.12:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"source": {
-								"type": "AzureSqlSource",
-								"sqlReaderQuery": {
-									"value": "SELECT COUNT(*) totfile_miscnt\nFROM LOG_FILE_POLLING\nWHERE CAST(BatchDate AS DATE) = '@{pipeline().parameters.pBatchDate}'\n  AND RetryNumber = @{variables('vRetryCount')} - 1\n  and FileExists <> 'T'",
-									"type": "Expression"
-								},
-								"queryTimeout": "02:00:00",
-								"partitionOption": "None"
-							},
-							"dataset": {
-								"referenceName": "DS_Log_file",
-								"type": "DatasetReference",
-								"parameters": {}
-							},
-							"firstRowOnly": true
-						}
-					},
-					{
-						"name": "If Condition1",
-						"type": "IfCondition",
-						"dependsOn": [
-							{
-								"activity": "Get final Missing file count",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
-						"userProperties": [],
-						"typeProperties": {
-							"expression": {
-								"value": "@equals(activity('Get final Missing file count').output.firstRow.totfile_miscnt,0)",
-								"type": "Expression"
-							},
-							"ifFalseActivities": [
-								{
-									"name": "Send Missing Files Email",
-									"type": "WebActivity",
-									"dependsOn": [
-										{
-											"activity": "Get Missing Files",
-											"dependencyConditions": [
-												"Succeeded"
-											]
-										}
-									],
-									"policy": {
-										"timeout": "0.12:00:00",
-										"retry": 0,
-										"retryIntervalInSeconds": 30,
-										"secureOutput": false,
-										"secureInput": false
-									},
-									"userProperties": [],
-									"typeProperties": {
-										"method": "POST",
-										"headers": {},
-										"url": {
-											"value": "@pipeline().globalParameters.GP_Logicapp_URL",
-											"type": "Expression"
-										},
-										"body": {
-											"value": "{\n  \"to\": \"@{pipeline().globalParameters.GP_EMAIL_TO}\",\n  \"subject\": \"@{concat(pipeline().globalParameters.GP_CUSTOMER_NAME, ' ', pipeline().globalParameters.GP_ENVIRONMENT, ' Missing files ', formatDateTime(utcNow(), 'yyyyMMdd'))}\",\n  \"body\": \"Find Below Missing Files list\",\n  \"missingFiles\": @{activity('Get Missing Files').output.value}\n}",
-											"type": "Expression"
-										}
-									}
-								},
-								{
-									"name": "Fail Batch",
-									"type": "Fail",
-									"dependsOn": [
-										{
-											"activity": "Send Missing Files Email",
-											"dependencyConditions": [
-												"Succeeded"
-											]
-										}
-									],
-									"userProperties": [],
-									"typeProperties": {
-										"message": "Files not available",
-										"errorCode": "Files missing"
-									}
-								},
-								{
-									"name": "Get Missing Files",
-									"type": "Lookup",
-									"dependsOn": [],
-									"policy": {
-										"timeout": "0.12:00:00",
-										"retry": 0,
-										"retryIntervalInSeconds": 30,
-										"secureOutput": false,
-										"secureInput": false
-									},
-									"userProperties": [],
-									"typeProperties": {
-										"source": {
-											"type": "AzureSqlSource",
-											"sqlReaderQuery": {
-												"value": "SELECT FileID\n,FileName\nFROM LOG_FILE_POLLING\nWHERE CAST(BatchDate AS DATE) = '@{pipeline().parameters.pBatchDate}'\n  AND RetryNumber = @{variables('vRetryCount')} - 1\n  and FileExists <> 'T'\n  order by FileID ASC",
-												"type": "Expression"
-											},
-											"queryTimeout": "02:00:00",
-											"partitionOption": "None"
-										},
-										"dataset": {
-											"referenceName": "DS_Log_file",
-											"type": "DatasetReference",
-											"parameters": {}
-										},
-										"firstRowOnly": false
-									}
-								}
-							],
-							"ifTrueActivities": [
-								{
-									"name": "Copy Files from raw to bronze",
-									"type": "ExecutePipeline",
-									"dependsOn": [],
-									"policy": {
-										"secureInput": false
-									},
-									"userProperties": [],
-									"typeProperties": {
-										"pipeline": {
-											"referenceName": "PL_COPY_FILES_RAW_TO_BRONZ",
-											"type": "PipelineReference"
-										},
-										"waitOnCompletion": true,
-										"parameters": {}
-									}
-								},
-								{
-									"name": "File copy message mail",
-									"type": "WebActivity",
-									"dependsOn": [
-										{
-											"activity": "Copy Files from raw to bronze",
-											"dependencyConditions": [
-												"Succeeded"
-											]
-										}
-									],
-									"policy": {
-										"timeout": "0.12:00:00",
-										"retry": 0,
-										"retryIntervalInSeconds": 30,
-										"secureOutput": false,
-										"secureInput": false
-									},
-									"userProperties": [],
-									"typeProperties": {
-										"method": "POST",
-										"headers": {},
-										"url": {
-											"value": "@pipeline().globalParameters.GP_Logicapp_URL",
-											"type": "Expression"
-										},
-										"body": {
-											"value": "{\n  \"to\": \"@{pipeline().globalParameters.GP_EMAIL_TO}\",\n  \"subject\": \"@{concat(pipeline().globalParameters.GP_CUSTOMER_NAME, ' ', pipeline().globalParameters.GP_ENVIRONMENT, 'Files copied ', formatDateTime(utcNow(), 'yyyyMMdd'))}\",\n  \"body\": \"All input files are copied from raw to bronze \",\n  \"missingFiles\": []\n}",
-											"type": "Expression"
-										}
-									}
-								}
-							]
-						}
-					}
-				],
-				"policy": {
-					"elapsedTimeMetric": {}
-				},
-				"parameters": {
-					"pBatchDate": {
-						"type": "string"
-					}
-				},
-				"variables": {
-					"vRetryCount": {
-						"type": "Integer",
-						"defaultValue": 1
-					},
-					"vMissingCount": {
-						"type": "Integer",
-						"defaultValue": 10
-					},
-					"vFileExists": {
-						"type": "Boolean",
-						"defaultValue": false
-					},
-					"vRetryCount_Temp": {
-						"type": "Integer",
-						"defaultValue": 1
-					}
-				},
-				"folder": {
-					"name": "ABC_Dev"
-				},
-				"annotations": []
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/datasets/DS_Log_file')]",
-				"[concat(variables('factoryId'), '/pipelines/PL_File_Check')]",
-				"[concat(variables('factoryId'), '/pipelines/PL_COPY_FILES_RAW_TO_BRONZ')]"
 			]
 		}
 	]

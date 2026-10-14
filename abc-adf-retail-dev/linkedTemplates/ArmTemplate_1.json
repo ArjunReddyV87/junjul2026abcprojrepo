@@ -13,7 +13,403 @@
 	},
 	"resources": [
 		{
-			"name": "[concat(parameters('factoryName'), '/PL_Main')]",
+			"name": "[concat(parameters('factoryName'), '/PL_FILE_POLLING_Coping')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "UNTIL_FILES_AVAILABLE",
+						"type": "Until",
+						"dependsOn": [],
+						"userProperties": [],
+						"typeProperties": {
+							"expression": {
+								"value": "@or(\n    equals(variables('vMissingCount'),0),\n    greaterOrEquals(\n        variables('vRetryCount'),\n        pipeline().globalParameters.GP_POLLING_COUNT\n    )\n)",
+								"type": "Expression"
+							},
+							"activities": [
+								{
+									"name": "File Availability Check",
+									"type": "ExecutePipeline",
+									"dependsOn": [],
+									"policy": {
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"pipeline": {
+											"referenceName": "PL_File_Check",
+											"type": "PipelineReference"
+										},
+										"waitOnCompletion": true,
+										"parameters": {
+											"pbatchdate": {
+												"value": "@pipeline().parameters.pBatchDate",
+												"type": "Expression"
+											},
+											"pretrycnt": {
+												"value": "@variables('vRetryCount')",
+												"type": "Expression"
+											}
+										}
+									}
+								},
+								{
+									"name": "Get Missing file count",
+									"type": "Lookup",
+									"dependsOn": [
+										{
+											"activity": "File Availability Check",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"policy": {
+										"timeout": "0.12:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"source": {
+											"type": "AzureSqlSource",
+											"sqlReaderQuery": {
+												"value": "SELECT COUNT(*) AS totfile_miscnt\nFROM LOG_FILE_POLLING\nWHERE CAST(BatchDate AS DATE) = '@{pipeline().parameters.pBatchDate}'\n  AND RetryNumber = @{variables('vRetryCount')}\n  and FileExists <> 'T'",
+												"type": "Expression"
+											},
+											"queryTimeout": "02:00:00",
+											"partitionOption": "None"
+										},
+										"dataset": {
+											"referenceName": "DS_Log_file",
+											"type": "DatasetReference",
+											"parameters": {}
+										}
+									}
+								},
+								{
+									"name": "Assign Missing file count",
+									"type": "SetVariable",
+									"dependsOn": [
+										{
+											"activity": "Get Missing file count",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"policy": {
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"variableName": "vMissingCount",
+										"value": {
+											"value": "@activity('Get Missing file count').output.firstRow.totfile_miscnt",
+											"type": "Expression"
+										}
+									}
+								},
+								{
+									"name": "Set retry temp",
+									"type": "SetVariable",
+									"dependsOn": [
+										{
+											"activity": "Get Missing file count",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"policy": {
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"variableName": "vRetryCount_Temp",
+										"value": {
+											"value": "@variables('vRetryCount')",
+											"type": "Expression"
+										}
+									}
+								},
+								{
+									"name": "Set retry cnt",
+									"type": "SetVariable",
+									"dependsOn": [
+										{
+											"activity": "Set retry temp",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"policy": {
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"variableName": "vRetryCount",
+										"value": {
+											"value": "@add(variables('vRetryCount_Temp'),1)",
+											"type": "Expression"
+										}
+									}
+								},
+								{
+									"name": "Wait time",
+									"type": "Wait",
+									"dependsOn": [
+										{
+											"activity": "Set retry cnt",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"userProperties": [],
+									"typeProperties": {
+										"waitTimeInSeconds": {
+											"value": "@pipeline().globalParameters.GP_POLLING_WAIT_SECONDS",
+											"type": "Expression"
+										}
+									}
+								}
+							],
+							"timeout": "0.12:00:00"
+						}
+					},
+					{
+						"name": "Get final Missing file count",
+						"type": "Lookup",
+						"dependsOn": [
+							{
+								"activity": "UNTIL_FILES_AVAILABLE",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureSqlSource",
+								"sqlReaderQuery": {
+									"value": "SELECT COUNT(*) totfile_miscnt\nFROM LOG_FILE_POLLING\nWHERE CAST(BatchDate AS DATE) = '@{pipeline().parameters.pBatchDate}'\n  AND RetryNumber = @{variables('vRetryCount')} - 1\n  and FileExists <> 'T'",
+									"type": "Expression"
+								},
+								"queryTimeout": "02:00:00",
+								"partitionOption": "None"
+							},
+							"dataset": {
+								"referenceName": "DS_Log_file",
+								"type": "DatasetReference",
+								"parameters": {}
+							},
+							"firstRowOnly": true
+						}
+					},
+					{
+						"name": "If Condition1",
+						"type": "IfCondition",
+						"dependsOn": [
+							{
+								"activity": "Get final Missing file count",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"expression": {
+								"value": "@equals(activity('Get final Missing file count').output.firstRow.totfile_miscnt,0)",
+								"type": "Expression"
+							},
+							"ifFalseActivities": [
+								{
+									"name": "Send Missing Files Email",
+									"type": "WebActivity",
+									"dependsOn": [
+										{
+											"activity": "Get Missing Files",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"policy": {
+										"timeout": "0.12:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"method": "POST",
+										"headers": {},
+										"url": {
+											"value": "@pipeline().globalParameters.GP_Logicapp_URL",
+											"type": "Expression"
+										},
+										"body": {
+											"value": "{\n  \"to\": \"@{pipeline().globalParameters.GP_EMAIL_TO}\",\n  \"subject\": \"@{concat(pipeline().globalParameters.GP_CUSTOMER_NAME, ' ', pipeline().globalParameters.GP_ENVIRONMENT, ' Missing files ', formatDateTime(utcNow(), 'yyyyMMdd'))}\",\n  \"body\": \"Find Below Missing Files list\",\n  \"missingFiles\": @{activity('Get Missing Files').output.value}\n}",
+											"type": "Expression"
+										}
+									}
+								},
+								{
+									"name": "Fail Batch",
+									"type": "Fail",
+									"dependsOn": [
+										{
+											"activity": "Send Missing Files Email",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"userProperties": [],
+									"typeProperties": {
+										"message": "Files not available",
+										"errorCode": "Files missing"
+									}
+								},
+								{
+									"name": "Get Missing Files",
+									"type": "Lookup",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "0.12:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"source": {
+											"type": "AzureSqlSource",
+											"sqlReaderQuery": {
+												"value": "SELECT FileID\n,FileName\nFROM LOG_FILE_POLLING\nWHERE CAST(BatchDate AS DATE) = '@{pipeline().parameters.pBatchDate}'\n  AND RetryNumber = @{variables('vRetryCount')} - 1\n  and FileExists <> 'T'\n  order by FileID ASC",
+												"type": "Expression"
+											},
+											"queryTimeout": "02:00:00",
+											"partitionOption": "None"
+										},
+										"dataset": {
+											"referenceName": "DS_Log_file",
+											"type": "DatasetReference",
+											"parameters": {}
+										},
+										"firstRowOnly": false
+									}
+								}
+							],
+							"ifTrueActivities": [
+								{
+									"name": "Copy Files from raw to bronze",
+									"type": "ExecutePipeline",
+									"dependsOn": [],
+									"policy": {
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"pipeline": {
+											"referenceName": "PL_COPY_FILES_RAW_TO_BRONZ",
+											"type": "PipelineReference"
+										},
+										"waitOnCompletion": true,
+										"parameters": {}
+									}
+								},
+								{
+									"name": "File copy message mail",
+									"type": "WebActivity",
+									"dependsOn": [
+										{
+											"activity": "Copy Files from raw to bronze",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"policy": {
+										"timeout": "0.12:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"method": "POST",
+										"headers": {},
+										"url": {
+											"value": "@pipeline().globalParameters.GP_Logicapp_URL",
+											"type": "Expression"
+										},
+										"body": {
+											"value": "{\n  \"to\": \"@{pipeline().globalParameters.GP_EMAIL_TO}\",\n  \"subject\": \"@{concat(pipeline().globalParameters.GP_CUSTOMER_NAME, ' ', pipeline().globalParameters.GP_ENVIRONMENT, 'Files copied ', formatDateTime(utcNow(), 'yyyyMMdd'))}\",\n  \"body\": \"All input files are copied from raw to bronze \",\n  \"missingFiles\": []\n}",
+											"type": "Expression"
+										}
+									}
+								}
+							]
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"parameters": {
+					"pBatchDate": {
+						"type": "string"
+					}
+				},
+				"variables": {
+					"vRetryCount": {
+						"type": "Integer",
+						"defaultValue": 1
+					},
+					"vMissingCount": {
+						"type": "Integer",
+						"defaultValue": 10
+					},
+					"vFileExists": {
+						"type": "Boolean",
+						"defaultValue": false
+					},
+					"vRetryCount_Temp": {
+						"type": "Integer",
+						"defaultValue": 1
+					}
+				},
+				"folder": {
+					"name": "ABC_Dev"
+				},
+				"annotations": []
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/PL_Daily_Batch')]",
 			"type": "Microsoft.DataFactory/factories/pipelines",
 			"apiVersion": "2018-06-01",
 			"properties": {
@@ -63,6 +459,154 @@
 								}
 							}
 						}
+					},
+					{
+						"name": "Bronze file to bronze tables load",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "Check for files",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "PL_BRONZE_LOAD",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"pBatchDate": {
+									"value": "@pipeline().parameters.pbatchdate",
+									"type": "Expression"
+								},
+								"pBatchID": {
+									"value": "@pipeline().parameters.pbatchID",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "Bronze to silver load",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "Bronze file to bronze tables load",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "PL_Bronze_to_Silver",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"pbatchid": {
+									"value": "@pipeline().parameters.pbatchID",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "Silver to Gold",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "Bronze to silver load",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "PL_Gold_Load",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"pBatchid": {
+									"value": "@pipeline().parameters.pbatchID",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "Archive and Delete Bronze files",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "Silver to Gold",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "PL_ARCHIVE",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"pBatchID": {
+									"value": "@pipeline().parameters.pbatchID",
+									"type": "Expression"
+								},
+								"pBatchDate": {
+									"value": "@pipeline().parameters.pbatchdate",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "Purge old files",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "Archive and Delete Bronze files",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "PL_FILE_PURGE",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {}
+						}
 					}
 				],
 				"policy": {
@@ -71,6 +615,9 @@
 				"parameters": {
 					"pbatchdate": {
 						"type": "string"
+					},
+					"pbatchID": {
+						"type": "string"
 					}
 				},
 				"folder": {
@@ -78,7 +625,240 @@
 				},
 				"annotations": []
 			},
-			"dependsOn": []
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/pipelines/PL_FILE_POLLING_Coping')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/PL_Main')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "set batch date",
+						"type": "SetVariable",
+						"dependsOn": [],
+						"policy": {
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "vBatchDate",
+							"value": {
+								"value": "@formatDateTime(\n    convertFromUtc(utcnow(), 'India Standard Time'),\n    'yyyy-MM-dd'\n)",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "set batchid",
+						"type": "SetVariable",
+						"dependsOn": [],
+						"policy": {
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "vBatchid",
+							"value": {
+								"value": "@formatDateTime(utcnow(),'yyyyMMddHHmmss')",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "Execute daily batch",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "SP_START_BATCH",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "PL_Daily_Batch",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"pbatchdate": {
+									"value": "@variables('vBatchDate')",
+									"type": "Expression"
+								},
+								"pbatchID": {
+									"value": "@variables('vBatchid')",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "SP_START_BATCH",
+						"type": "SqlServerStoredProcedure",
+						"dependsOn": [
+							{
+								"activity": "set batch date",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							},
+							{
+								"activity": "set batchid",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"storedProcedureName": "[[dbo].[usp_StartBatch]",
+							"storedProcedureParameters": {
+								"BatchDate": {
+									"value": {
+										"value": "@variables('vBatchDate')",
+										"type": "Expression"
+									},
+									"type": "DateTime"
+								},
+								"BatchID": {
+									"value": {
+										"value": "@variables('vBatchid')",
+										"type": "Expression"
+									},
+									"type": "Int64"
+								}
+							}
+						},
+						"linkedServiceName": {
+							"referenceName": "LS_SQLDB",
+							"type": "LinkedServiceReference"
+						}
+					},
+					{
+						"name": "SP_BATCH_SUCCESS",
+						"type": "SqlServerStoredProcedure",
+						"dependsOn": [
+							{
+								"activity": "Execute daily batch",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"storedProcedureName": "[[dbo].[usp_UpdateBatchStatus]",
+							"storedProcedureParameters": {
+								"BatchID": {
+									"value": {
+										"value": "@variables('vBatchid')",
+										"type": "Expression"
+									},
+									"type": "Int64"
+								},
+								"ErrorMessage": {
+									"value": "",
+									"type": "String"
+								},
+								"Status": {
+									"value": "SUCCESS",
+									"type": "String"
+								}
+							}
+						},
+						"linkedServiceName": {
+							"referenceName": "LS_SQLDB",
+							"type": "LinkedServiceReference"
+						}
+					},
+					{
+						"name": "SP_BATCH_FAILURE",
+						"type": "SqlServerStoredProcedure",
+						"dependsOn": [
+							{
+								"activity": "Execute daily batch",
+								"dependencyConditions": [
+									"Failed"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"storedProcedureName": "[[dbo].[usp_UpdateBatchStatus]",
+							"storedProcedureParameters": {
+								"BatchID": {
+									"value": {
+										"value": "@variables('vBatchid')",
+										"type": "Expression"
+									},
+									"type": "Int64"
+								},
+								"ErrorMessage": {
+									"value": {
+										"value": "@activity('Execute daily batch').error.message\n",
+										"type": "Expression"
+									},
+									"type": "String"
+								},
+								"Status": {
+									"value": "FAILED",
+									"type": "String"
+								}
+							}
+						},
+						"linkedServiceName": {
+							"referenceName": "LS_SQLDB",
+							"type": "LinkedServiceReference"
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"variables": {
+					"vBatchDate": {
+						"type": "String"
+					},
+					"vBatchid": {
+						"type": "String"
+					}
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/pipelines/PL_Daily_Batch')]"
+			]
 		}
 	]
 }
