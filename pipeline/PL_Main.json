@@ -39,8 +39,6 @@
 			{
 				"name": "Execute daily batch",
 				"type": "ExecutePipeline",
-				"state": "Inactive",
-				"onInactiveMarkAs": "Succeeded",
 				"dependsOn": [
 					{
 						"activity": "SP_START_BATCH",
