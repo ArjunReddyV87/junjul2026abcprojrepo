@@ -35,13 +35,7 @@
 				"type": "ExecutePipeline",
 				"dependsOn": [
 					{
-						"activity": "set batch date",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					},
-					{
-						"activity": "set batchid",
+						"activity": "SP_START_BATCH",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -67,6 +61,146 @@
 							"type": "Expression"
 						}
 					}
+				}
+			},
+			{
+				"name": "SP_START_BATCH",
+				"type": "SqlServerStoredProcedure",
+				"dependsOn": [
+					{
+						"activity": "set batch date",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					},
+					{
+						"activity": "set batchid",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"storedProcedureName": "[dbo].[usp_StartBatch]",
+					"storedProcedureParameters": {
+						"BatchDate": {
+							"value": {
+								"value": "@variables('vBatchDate')",
+								"type": "Expression"
+							},
+							"type": "DateTime"
+						},
+						"BatchID": {
+							"value": {
+								"value": "@variables('vBatchid')",
+								"type": "Expression"
+							},
+							"type": "Int64"
+						}
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "LS_SQLDB",
+					"type": "LinkedServiceReference"
+				}
+			},
+			{
+				"name": "SP_BATCH_SUCCESS",
+				"type": "SqlServerStoredProcedure",
+				"dependsOn": [
+					{
+						"activity": "Execute daily batch",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"storedProcedureName": "[dbo].[usp_UpdateBatchStatus]",
+					"storedProcedureParameters": {
+						"BatchID": {
+							"value": {
+								"value": "@variables('vBatchid')",
+								"type": "Expression"
+							},
+							"type": "Int64"
+						},
+						"ErrorMessage": {
+							"value": "",
+							"type": "String"
+						},
+						"Status": {
+							"value": "SUCCESS",
+							"type": "String"
+						}
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "LS_SQLDB",
+					"type": "LinkedServiceReference"
+				}
+			},
+			{
+				"name": "SP_BATCH_FAILURE",
+				"type": "SqlServerStoredProcedure",
+				"dependsOn": [
+					{
+						"activity": "Execute daily batch",
+						"dependencyConditions": [
+							"Failed"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"storedProcedureName": "[dbo].[usp_UpdateBatchStatus]",
+					"storedProcedureParameters": {
+						"BatchID": {
+							"value": {
+								"value": "@variables('vBatchid')",
+								"type": "Expression"
+							},
+							"type": "Int64"
+						},
+						"ErrorMessage": {
+							"value": {
+								"value": "@activity('Execute daily batch').error.message\n",
+								"type": "Expression"
+							},
+							"type": "String"
+						},
+						"Status": {
+							"value": "FAILED",
+							"type": "String"
+						}
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "LS_SQLDB",
+					"type": "LinkedServiceReference"
 				}
 			}
 		],

@@ -170,6 +170,29 @@
 						}
 					}
 				}
+			},
+			{
+				"name": "Purge old files",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "Archive and Delete Bronze files",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "PL_FILE_PURGE",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
 			}
 		],
 		"parameters": {
