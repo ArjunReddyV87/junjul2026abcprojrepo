@@ -1,5 +1,5 @@
 {
-	"name": "PL_Main",
+	"name": "PL_Daily_Batch",
 	"properties": {
 		"activities": [
 			{
@@ -104,6 +104,68 @@
 					"parameters": {
 						"pbatchid": {
 							"value": "@pipeline().parameters.pbatchID",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			{
+				"name": "Silver to Gold",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "Bronze to silver load",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "PL_Gold_Load",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"pBatchid": {
+							"value": "@pipeline().parameters.pbatchID",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			{
+				"name": "Archive and Delete Bronze files",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "Silver to Gold",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "PL_ARCHIVE",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"pBatchID": {
+							"value": "@pipeline().parameters.pbatchID",
+							"type": "Expression"
+						},
+						"pBatchDate": {
+							"value": "@pipeline().parameters.pbatchdate",
 							"type": "Expression"
 						}
 					}

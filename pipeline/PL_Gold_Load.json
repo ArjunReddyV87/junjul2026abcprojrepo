@@ -1,0 +1,42 @@
+{
+	"name": "PL_Gold_Load",
+	"properties": {
+		"activities": [
+			{
+				"name": "Load sink to Gold",
+				"type": "DatabricksNotebook",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"notebookPath": "/abcdev/nb_gold_load_2",
+					"baseParameters": {
+						"batch_id": {
+							"value": "@pipeline().parameters.pBatchid",
+							"type": "Expression"
+						}
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "LS_DataBricks",
+					"type": "LinkedServiceReference"
+				}
+			}
+		],
+		"parameters": {
+			"pBatchid": {
+				"type": "string"
+			}
+		},
+		"folder": {
+			"name": "ABC_Dev"
+		},
+		"annotations": []
+	}
+}

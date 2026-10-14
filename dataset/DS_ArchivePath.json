@@ -1,0 +1,31 @@
+{
+	"name": "DS_ArchivePath",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "LS_abcadlsretaildev",
+			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"batchid": {
+				"type": "string"
+			}
+		},
+		"annotations": [],
+		"type": "DelimitedText",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"folderPath": {
+					"value": "@concat('archive','/',dataset().batchid)",
+					"type": "Expression"
+				},
+				"fileSystem": "abcdev"
+			},
+			"columnDelimiter": ",",
+			"escapeChar": "\\",
+			"firstRowAsHeader": true,
+			"quoteChar": "\""
+		},
+		"schema": []
+	}
+}

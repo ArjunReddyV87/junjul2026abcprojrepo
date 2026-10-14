@@ -1,0 +1,83 @@
+{
+	"name": "PL_Main",
+	"properties": {
+		"activities": [
+			{
+				"name": "set batch date",
+				"type": "SetVariable",
+				"dependsOn": [],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "vBatchDate",
+					"value": "@formatDateTime(\n    convertFromUtc(utcnow(), 'India Standard Time'),\n    'yyyy-MM-dd'\n)"
+				}
+			},
+			{
+				"name": "set batchid",
+				"type": "SetVariable",
+				"dependsOn": [],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "vBatchid",
+					"value": "@formatDateTime(utcnow(),'yyyyMMddHHmmss')"
+				}
+			},
+			{
+				"name": "Execute daily batch",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "set batch date",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					},
+					{
+						"activity": "set batchid",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "PL_Daily_Batch",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"pbatchdate": {
+							"value": "@variables('vBatchDate')",
+							"type": "Expression"
+						},
+						"pbatchID": {
+							"value": "@variables('vBatchid')",
+							"type": "Expression"
+						}
+					}
+				}
+			}
+		],
+		"variables": {
+			"vBatchDate": {
+				"type": "String"
+			},
+			"vBatchid": {
+				"type": "String"
+			}
+		},
+		"annotations": []
+	}
+}

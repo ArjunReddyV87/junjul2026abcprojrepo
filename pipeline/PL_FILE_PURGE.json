@@ -1,17 +1,122 @@
 {
-	"name": "PL_purging",
+	"name": "PL_FILE_PURGE",
 	"properties": {
 		"activities": [
 			{
-				"name": "Wait1",
-				"type": "Wait",
+				"name": "GM_ARCHIVE_FILES",
+				"type": "GetMetadata",
 				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
 				"userProperties": [],
 				"typeProperties": {
-					"waitTimeInSeconds": 1
+					"dataset": {
+						"referenceName": "DS_ArchivePath",
+						"type": "DatasetReference",
+						"parameters": {
+							"batchid": {
+								"value": "@pipeline().parameters.batchid",
+								"type": "Expression"
+							}
+						}
+					},
+					"fieldList": [
+						"childItems"
+					],
+					"storeSettings": {
+						"type": "AzureBlobFSReadSettings",
+						"enablePartitionDiscovery": false
+					},
+					"formatSettings": {
+						"type": "DelimitedTextReadSettings"
+					}
+				}
+			},
+			{
+				"name": "FE_ARCHIVE_FOLDERS",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "GM_ARCHIVE_FILES",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('GM_ARCHIVE_FILES').output.childItems",
+						"type": "Expression"
+					},
+					"isSequential": true,
+					"activities": [
+						{
+							"name": "Check files more than retention",
+							"type": "IfCondition",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"expression": {
+									"value": "@and(\n    equals(item().type, 'Folder'),\n    less(\n        item().name,\n        formatDateTime(\n            addDays(utcnow(), mul(-1,pipeline().globalParameters.GP_ARCHIVE_DAYS)),\n            'yyyyMMddHHmmss'\n        )\n    )\n)",
+									"type": "Expression"
+								},
+								"ifTrueActivities": [
+									{
+										"name": "DEL_OLD_BATCH",
+										"type": "Delete",
+										"dependsOn": [],
+										"policy": {
+											"timeout": "0.12:00:00",
+											"retry": 0,
+											"retryIntervalInSeconds": 30,
+											"secureOutput": false,
+											"secureInput": false
+										},
+										"userProperties": [],
+										"typeProperties": {
+											"dataset": {
+												"referenceName": "DS_ArchivePath",
+												"type": "DatasetReference",
+												"parameters": {
+													"batchid": {
+														"value": "@item().name",
+														"type": "Expression"
+													}
+												}
+											},
+											"logStorageSettings": {
+												"linkedServiceName": {
+													"referenceName": "LS_abcadlsretaildev",
+													"type": "LinkedServiceReference"
+												},
+												"path": "abcdev/log"
+											},
+											"enableLogging": true,
+											"storeSettings": {
+												"type": "AzureBlobFSReadSettings",
+												"recursive": true,
+												"enablePartitionDiscovery": false
+											}
+										}
+									}
+								]
+							}
+						}
+					]
 				}
 			}
 		],
+		"parameters": {
+			"batchid": {
+				"type": "string"
+			}
+		},
 		"folder": {
 			"name": "ABC_Dev"
 		},
