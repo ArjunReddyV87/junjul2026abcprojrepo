@@ -22,9 +22,9 @@
 				"type": "int",
 				"value": 120
 			},
-			"GP_ARCHIVE_DAYS": {
+			"GP_PURGING_DAYS": {
 				"type": "int",
-				"value": 1
+				"value": 2
 			},
 			"GP_EMAIL_TO": {
 				"type": "string",
