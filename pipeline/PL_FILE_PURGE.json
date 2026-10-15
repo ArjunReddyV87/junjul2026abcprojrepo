@@ -30,6 +30,7 @@
 					],
 					"storeSettings": {
 						"type": "AzureBlobFSReadSettings",
+						"recursive": true,
 						"enablePartitionDiscovery": false
 					},
 					"formatSettings": {
@@ -63,7 +64,7 @@
 							"userProperties": [],
 							"typeProperties": {
 								"expression": {
-									"value": "@and(\n    equals(item().type, 'Folder'),\n    less(\n        item().name,\n        formatDateTime(\n            addDays(utcnow(), mul(-1,pipeline().globalParameters.GP_ARCHIVE_DAYS)),\n            'yyyyMMddHHmmss'\n        )\n    )\n)",
+									"value": "@and(\n    equals(item().type, 'Folder'),\n    less(\n        item().name,\n        formatDateTime(\n            addDays(utcnow(), mul(-1,pipeline().globalParameters.GP_PURGING_DAYS)),\n            'yyyyMMddHHmmss'\n        )\n    )\n)",
 									"type": "Expression"
 								},
 								"ifTrueActivities": [
