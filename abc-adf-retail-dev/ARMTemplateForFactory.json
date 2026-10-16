@@ -7,18 +7,6 @@
 			"metadata": "Data Factory name",
 			"defaultValue": "abc-adf-retail-dev"
 		},
-		"LS_Input_Raw_File_accountKey": {
-			"type": "secureString",
-			"metadata": "Secure string for 'accountKey' of 'LS_Input_Raw_File'"
-		},
-		"LS_SQLDB_password": {
-			"type": "secureString",
-			"metadata": "Secure string for 'password' of 'LS_SQLDB'"
-		},
-		"LS_abcadlsretaildev_accountKey": {
-			"type": "secureString",
-			"metadata": "Secure string for 'accountKey' of 'LS_abcadlsretaildev'"
-		},
 		"LS_DataBricks_properties_typeProperties_existingClusterId": {
 			"type": "string",
 			"defaultValue": "1009-195026-mlfqubob"
@@ -2202,12 +2190,18 @@
 				"typeProperties": {
 					"url": "[parameters('LS_Input_Raw_File_properties_typeProperties_url')]",
 					"accountKey": {
-						"type": "SecureString",
-						"value": "[parameters('LS_Input_Raw_File_accountKey')]"
+						"type": "AzureKeyVaultSecret",
+						"store": {
+							"referenceName": "LS_AKV",
+							"type": "LinkedServiceReference"
+						},
+						"secretName": "abcinputstorkey"
 					}
 				}
 			},
-			"dependsOn": []
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/LS_AKV')]"
+			]
 		},
 		{
 			"name": "[concat(parameters('factoryName'), '/LS_SQLDB')]",
@@ -2224,12 +2218,18 @@
 					"authenticationType": "SQL",
 					"userName": "[parameters('LS_SQLDB_properties_typeProperties_userName')]",
 					"password": {
-						"type": "SecureString",
-						"value": "[parameters('LS_SQLDB_password')]"
+						"type": "AzureKeyVaultSecret",
+						"store": {
+							"referenceName": "LS_AKV",
+							"type": "LinkedServiceReference"
+						},
+						"secretName": "dbpassword"
 					}
 				}
 			},
-			"dependsOn": []
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/LS_AKV')]"
+			]
 		},
 		{
 			"name": "[concat(parameters('factoryName'), '/LS_abcadlsretaildev')]",
@@ -2241,12 +2241,18 @@
 				"typeProperties": {
 					"url": "[parameters('LS_abcadlsretaildev_properties_typeProperties_url')]",
 					"accountKey": {
-						"type": "SecureString",
-						"value": "[parameters('LS_abcadlsretaildev_accountKey')]"
+						"type": "AzureKeyVaultSecret",
+						"store": {
+							"referenceName": "LS_AKV",
+							"type": "LinkedServiceReference"
+						},
+						"secretName": "adlsbronzestorkey"
 					}
 				}
 			},
-			"dependsOn": []
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/LS_AKV')]"
+			]
 		},
 		{
 			"name": "[concat(parameters('factoryName'), '/AR-selfhosted-IR')]",
