@@ -5,9 +5,6 @@
 		"factoryName": {
 			"value": "abc-adf-retail-dev"
 		},
-		"LS_DataBricks_accessToken": {
-			"value": ""
-		},
 		"LS_Input_Raw_File_accountKey": {
 			"value": ""
 		},
@@ -34,6 +31,9 @@
 		},
 		"LS_abcadlsretaildev_properties_typeProperties_url": {
 			"value": "https://abcadlsretaildev.dfs.core.windows.net/"
+		},
+		"LS_AKV_properties_typeProperties_baseUrl": {
+			"value": "https://abc-kv-retail-dev.vault.azure.net/"
 		},
 		"containerUri": {
 			"value": ""

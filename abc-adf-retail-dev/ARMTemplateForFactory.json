@@ -7,10 +7,6 @@
 			"metadata": "Data Factory name",
 			"defaultValue": "abc-adf-retail-dev"
 		},
-		"LS_DataBricks_accessToken": {
-			"type": "secureString",
-			"metadata": "Secure string for 'accessToken' of 'LS_DataBricks'"
-		},
 		"LS_Input_Raw_File_accountKey": {
 			"type": "secureString",
 			"metadata": "Secure string for 'accountKey' of 'LS_Input_Raw_File'"
@@ -46,6 +42,10 @@
 		"LS_abcadlsretaildev_properties_typeProperties_url": {
 			"type": "string",
 			"defaultValue": "https://abcadlsretaildev.dfs.core.windows.net/"
+		},
+		"LS_AKV_properties_typeProperties_baseUrl": {
+			"type": "string",
+			"defaultValue": "https://abc-kv-retail-dev.vault.azure.net/"
 		}
 	},
 	"variables": {
@@ -2178,13 +2178,19 @@
 				"typeProperties": {
 					"domain": "https://adb-7405617749140414.14.azuredatabricks.net",
 					"accessToken": {
-						"type": "SecureString",
-						"value": "[parameters('LS_DataBricks_accessToken')]"
+						"type": "AzureKeyVaultSecret",
+						"store": {
+							"referenceName": "LS_AKV",
+							"type": "LinkedServiceReference"
+						},
+						"secretName": "DBWKey"
 					},
 					"existingClusterId": "[parameters('LS_DataBricks_properties_typeProperties_existingClusterId')]"
 				}
 			},
-			"dependsOn": []
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/LS_AKV')]"
+			]
 		},
 		{
 			"name": "[concat(parameters('factoryName'), '/LS_Input_Raw_File')]",
@@ -2249,6 +2255,19 @@
 			"properties": {
 				"type": "SelfHosted",
 				"typeProperties": {}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/LS_AKV')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureKeyVault",
+				"typeProperties": {
+					"baseUrl": "[parameters('LS_AKV_properties_typeProperties_baseUrl')]"
+				}
 			},
 			"dependsOn": []
 		}

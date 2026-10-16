@@ -7,10 +7,6 @@
 			"metadata": "Data Factory name",
 			"defaultValue": "abc-adf-retail-dev"
 		},
-		"LS_DataBricks_accessToken": {
-			"type": "secureString",
-			"metadata": "Secure string for 'accessToken' of 'LS_DataBricks'"
-		},
 		"LS_Input_Raw_File_accountKey": {
 			"type": "secureString",
 			"metadata": "Secure string for 'accountKey' of 'LS_Input_Raw_File'"
@@ -47,6 +43,10 @@
 			"type": "string",
 			"defaultValue": "https://abcadlsretaildev.dfs.core.windows.net/"
 		},
+		"LS_AKV_properties_typeProperties_baseUrl": {
+			"type": "string",
+			"defaultValue": "https://abc-kv-retail-dev.vault.azure.net/"
+		},
 		"containerUri": {
 			"type": "string",
 			"metadata": "URI to storage account containing linked ARM templates"
@@ -74,9 +74,6 @@
 					"factoryName": {
 						"value": "[parameters('factoryName')]"
 					},
-					"LS_DataBricks_accessToken": {
-						"value": "[parameters('LS_DataBricks_accessToken')]"
-					},
 					"LS_Input_Raw_File_accountKey": {
 						"value": "[parameters('LS_Input_Raw_File_accountKey')]"
 					},
@@ -85,9 +82,6 @@
 					},
 					"LS_abcadlsretaildev_accountKey": {
 						"value": "[parameters('LS_abcadlsretaildev_accountKey')]"
-					},
-					"LS_DataBricks_properties_typeProperties_existingClusterId": {
-						"value": "[parameters('LS_DataBricks_properties_typeProperties_existingClusterId')]"
 					},
 					"LS_Input_Raw_File_properties_typeProperties_url": {
 						"value": "[parameters('LS_Input_Raw_File_properties_typeProperties_url')]"
@@ -103,6 +97,12 @@
 					},
 					"LS_abcadlsretaildev_properties_typeProperties_url": {
 						"value": "[parameters('LS_abcadlsretaildev_properties_typeProperties_url')]"
+					},
+					"LS_AKV_properties_typeProperties_baseUrl": {
+						"value": "[parameters('LS_AKV_properties_typeProperties_baseUrl')]"
+					},
+					"LS_DataBricks_properties_typeProperties_existingClusterId": {
+						"value": "[parameters('LS_DataBricks_properties_typeProperties_existingClusterId')]"
 					}
 				}
 			},
